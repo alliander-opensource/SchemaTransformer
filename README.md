@@ -1,4 +1,4 @@
-# Schema generator
+# Schema transformer
 
 Facilitates automatically generating schema's (Avro, Json) from profiles  ([dx-prof](https://www.w3.org/TR/dx-prof/)/CIM -501 using rdfs/owl+shacl).
 
