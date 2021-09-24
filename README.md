@@ -7,9 +7,22 @@ Facilitates automatically generating schema's (Avro, Json) from profiles  ([dx-p
 
 ## Vocabulary and Constraints used to define a profile
 
+To define the profile metadata the following constructs are used for the transformation:\
+
+| Profile (based on [dx-prof](https://www.w3.org/TR/dx-prof/)) |
+| --- |
+|[prof:Profile](http://www.w3.org/ns/dx/prof/Profile)|
+|[prof:ResourceDescriptor](http://www.w3.org/ns/dx/prof/ResourceDescriptor)|
+|[prof:ResourceRole](http://www.w3.org/ns/dx/prof/ResourceRole)|
+|[prof:hasResource](http://www.w3.org/ns/dx/prof/hasRole)|
+|[prof:hasArtifact](http://www.w3.org/ns/dx/prof/hasArtifact)|
+|[dct:format](http://purl.org/dc/terms/format)|
+|[role:constrains](http://www.w3.org/ns/dx/prof/role/constraints)|
+|[role:vocabulary](http://www.w3.org/ns/dx/prof/role/vocabulary)|
+
 To define the vocabulary of the profile, the following constructs will be used for the transformation:
 
-| Vocabulary |
+| Vocabulary (owl, rdfs, rdf) |
 | --- |
 | [owl:Class](http://www.w3.org/2002/07/owl#Class) |
 | [owl:DatatypeProperty](http://www.w3.org/2002/07/owl#DatatypeProperty) |
@@ -24,7 +37,7 @@ To define the vocabulary of the profile, the following constructs will be used f
 
 To define the constraints, the following constructs will be used for the transformation:
 
-| Constraints |
+| Constraints (shacl) |
 | --- | 
 | [sh:NodeShape](http://www.w3.org/ns/shacl#NodeShape) | 
 | [sh:targetClass](http://www.w3.org/ns/shacl#targetClass) | 
