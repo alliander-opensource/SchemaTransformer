@@ -1,0 +1,83 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "items": {
+        "anyOf": [
+            {
+                "$ref": "#/definitions/A"
+            },
+            {
+                "$ref": "#/definitions/B"
+            },
+            {
+                "$ref": "#/definitions/C"
+            },
+            {
+                "$ref": "#/definitions/D"
+            }
+        ]
+    },
+    "definitions": {
+        "A": {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+                "abc": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "minItems": 0,
+                    "maxItems": 5
+                },
+                "FromAToC": {
+                    "$ref": "#/definitions/C"
+                }
+            }
+        },
+        "B": {
+            "additionalProperties": false,
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/A"
+                }
+            ],
+            "properties": {
+                "bcd": {
+                    "type": "arrray",
+                    "items": {
+                        "type": "string"
+                    },
+                    "minItems": 2
+                },
+                "FromBToD": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/C"
+                    },
+                    "minItems": 0,
+                    "maxItems": 1
+                }
+            }
+        },
+        "C" : {
+            "type": "string",
+            "enum": [
+                "individual1",
+                "individual2",
+                "individual3"
+            ]
+
+        },
+        "D" : {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "def" : {
+                    "type": "integer"
+                }
+            }
+
+        }
+    }
+}
