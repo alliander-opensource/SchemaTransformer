@@ -12,12 +12,9 @@ import java.util.stream.Collectors;
 public class RDFMap {
     private final List<Model> rdfFiles;
 
-    private Optional<Model> profile;
+    private Model profile;
     private List<Model> constraints;
     private List<Model> vocabularies;
-
-    private Optional<String> constraintSubject;
-    private Optional<String> vocabularySubject;
 
     private final RDFType rdfType;
     private final IRI roleConstraints = Values.iri("http://www.w3.org/ns/dx/prof/role/constraints");
@@ -32,34 +29,36 @@ public class RDFMap {
     }
 
     private void mapRDFModels() {
-        this.profile = rdfFiles.stream()
+        Optional<Model> profile = rdfFiles.stream()
                 .filter(RDFType::isProfile)
                 .findFirst();
 
-        this.profile.ifPresent(profile -> this.constraintSubject = this.rdfType.getProfileResources(profile, this.roleConstraints));
+        this.profile = profile.orElseThrow(() -> new IllegalStateException("Profile not found, did you supply the correct files?"));
 
-        if (constraintSubject.isPresent())
-            this.constraints = this.rdfFiles
-                    .stream()
-                    .filter(m -> RDFType.isResource(m, this.constraintSubject.get()))
-                    .collect(Collectors.toList());
+        Optional<String> constraintSubject = this.rdfType.getProfileResources(this.profile, this.roleConstraints);
 
-        this.profile.ifPresent(profile -> this.vocabularySubject = this.rdfType.getProfileResources(profile, this.roleVocabulary));
+        constraintSubject.ifPresent(subject -> this.constraints = this.rdfFiles
+                .stream()
+                .filter(model -> RDFType.isResource(model, subject))
+                .collect(Collectors.toList()));
 
-        if (vocabularySubject.isPresent())
-            this.vocabularies = this.rdfFiles
-                    .stream()
-                    .filter(m -> RDFType.isResource(m, this.vocabularySubject.get()))
-                    .collect(Collectors.toList());
+        Optional<String> vocabularySubject = this.rdfType.getProfileResources(this.profile, this.roleVocabulary);
+
+        vocabularySubject.ifPresent(subject -> this.vocabularies = this.rdfFiles
+                .stream()
+                .filter(model -> RDFType.isResource(model, subject))
+                .collect(Collectors.toList()));
     }
 
-    public Optional<Model> getProfile(){
+    public Model getProfile() {
         return this.profile;
     }
 
-    public List<Model> getConstraints(){
+    public List<Model> getConstraints() {
         return this.constraints;
     }
 
-    public List<Model> getVocabularies(){return this.vocabularies;}
+    public List<Model> getVocabularies() {
+        return this.vocabularies;
+    }
 }
