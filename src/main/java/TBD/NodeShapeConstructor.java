@@ -10,16 +10,16 @@ public class NodeShapeConstructor {
     private final List<Model> constraints;
     private final Set<IRI> nodes = new HashSet<>();
     private final Set<Resource> propertyNodes = new HashSet<>();
-//    private final List<Property> propertyList = new Map<>();
+    private List<NodeShape> nodeShapeList;
 
     public NodeShapeConstructor(List<Model> constraints){
         this.constraints = constraints;
         getUniqueNodeShapes();
         getUniquePropertyNodes();
-        getPropertyNodeAttributes();
+        constructNodeShapes();
     }
 
-    public void getUniqueNodeShapes(){
+    private void getUniqueNodeShapes(){
         IRI predicate = Values.iri("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
         IRI object = Values.iri("http://www.w3.org/ns/shacl#NodeShape");
         for(Model m : this.constraints){
@@ -31,7 +31,7 @@ public class NodeShapeConstructor {
         }
     }
 
-    public void getUniquePropertyNodes(){
+    private void getUniquePropertyNodes(){
         IRI predicate = Values.iri("http://www.w3.org/ns/shacl#property");
         for(IRI node: this.nodes){
             for(Model m : this.constraints){
@@ -44,20 +44,42 @@ public class NodeShapeConstructor {
         }
     }
 
-    public void getPropertyNodeAttributes(){
+    private void constructNodeShapes(){
+        IRI targetClassPredicate = Values.iri("http://www.w3.org/ns/shacl#TargetClass");
+        List<NodeShape> nodeShapeList = new ArrayList<>();
+        for(IRI node: this.nodes){
+            List<Property> propertyList = new ArrayList<>();
+            String targetClass = null;
+            for(Resource pNode : this.propertyNodes){
+                for(Model m : this.constraints){
+                    for(Statement st : m){
+                        if(st.getPredicate().equals(targetClassPredicate) && st.getSubject().equals(node)){
+                            targetClass = st.getObject().stringValue();
+                        }
+                        if(st.getSubject().equals(node) && st.getObject().equals(pNode)){
+                            propertyList.add(getPropertyNodeAttributes(pNode));
+                        }
+                    }
+                }
+            }
+            nodeShapeList.add(new NodeShape(node.stringValue(), targetClass, propertyList));
+        }
+        this.nodeShapeList = nodeShapeList;
+    }
+
+    private Property getPropertyNodeAttributes(Resource pNode){
         IRI pathPredicate = Values.iri("http://www.w3.org/ns/shacl#path");
         IRI nodePredicate = Values.iri("http://www.w3.org/ns/shacl#node");
         IRI minCountPredicate = Values.iri("http://www.w3.org/ns/shacl#minCount");
         IRI maxCountPredicate = Values.iri("http://www.w3.org/ns/shacl#maxCount");
         IRI datatypePredicate = Values.iri("http://www.w3.org/ns/shacl#datatype");
         IRI enumerationPredicate = Values.iri("http://www.w3.org/ns/shacl#in");
-        for (Resource pNode: this.propertyNodes){
 
-            String path;
-            String node;
-            String datatype;
-            Optional<String> minCount = Optional.of("0");
-            Optional<String> maxCount = Optional.of("*");
+            String path = null;
+            String node = null;
+            String datatype = null;
+            String minCount = "0";
+            String maxCount = "*";
             List<String> enumerationList = new ArrayList<>();
 
             for (Model constraint : this.constraints) {
@@ -73,19 +95,17 @@ public class NodeShapeConstructor {
                         datatype = st.getObject().stringValue();
                     }
                     if(st.getPredicate().equals(minCountPredicate)){
-                        minCount = Optional.of(st.getObject().stringValue());
+                        minCount = st.getObject().stringValue();
                     }
                     if(st.getPredicate().equals(maxCountPredicate)){
-                        maxCount = Optional.of(st.getObject().stringValue());
+                        maxCount = st.getObject().stringValue();
                     }
                     if(st.getPredicate().equals(enumerationPredicate)){
                         propertyListConstructor((Resource) st.getObject(), enumerationList);
                     }
-
                 }
             }
-//            constructPropertyShape(pNode, path, node, datatype, minCount.get(), maxCount.get(), enumerationList);
-        }
+            return constructPropertyShape(path, node, datatype, minCount, maxCount, enumerationList);
     }
 
     private void propertyListConstructor(Resource firstNode, List<String> resultList){
@@ -108,22 +128,17 @@ public class NodeShapeConstructor {
         }
     }
 
-    private void constructPropertyShape(Resource propertyNode, String path, String node, String datatype, String minCount, String maxCount, List<String> enumerationList){
-        IRI predicate = Values.iri("http://www.w3.org/ns/shacl#property");
-        for(Model constraint: this.constraints){
-            for(Statement st: constraint){
-                if (st.getPredicate().equals(predicate) && st.getObject().equals(propertyNode)){
-                    Property property = new Property.Builder(path)
-                            .node(node)
-                            .dataType(datatype)
-                            .minCount(minCount)
-                            .maxCount(maxCount)
-                            .in(enumerationList)
-                            .build();
+    private Property constructPropertyShape(String path, String node, String datatype, String minCount, String maxCount, List<String> enumerationList){
+        return new Property.Builder(path)
+                .node(node)
+                .dataType(datatype)
+                .minCount(minCount)
+                .maxCount(maxCount)
+                .in(enumerationList)
+                .build();
+    }
 
-//                    this.propertyList.add(property);
-                }
-            }
-        }
+    public List<NodeShape> getNodeShapeList() {
+        return this.nodeShapeList;
     }
 }
