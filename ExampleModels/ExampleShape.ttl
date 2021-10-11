@@ -30,7 +30,8 @@ shape:AShape
     ] .
 
 shape:BShape
-    a sh:NodeShape ; 
+    a sh:NodeShape ;
+    rdfs:comment "RootObject" ;
     sh:targetClass vocab:B ;
         sh:property [
         sh:path vocab:id ;

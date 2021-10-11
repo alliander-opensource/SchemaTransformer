@@ -1,0 +1,30 @@
+@startuml
+
+
+class "prof:Profile"
+class "prof:ResourceDescriptor"
+class "rdfs:Resource"
+
+class "dct:MediaTypeOrExtend"
+enum "prof:ResourceRole" {
+    role:constraint
+    role:vocabulary
+}
+
+abstract class "owl:Thing" [[http://www.w3.org/2002/07/owl#Thing]]{ 
+ [[http://www.w3.org/2000/01/rdf-schema#comment rdfs:comment ]]  : "xsd:string" 
+}
+
+"owl:Thing"<|-- "prof:Profile"
+"owl:Thing"<|-- "rdfs:Resource"
+"owl:Thing"<|-- "prof:ResourceDescriptor"
+"owl:Thing"<|-- "prof:ResourceRole"
+"owl:Thing"<|-- "dct:MediaTypeOrExtend"
+
+"prof:Profile" -->  "prof:ResourceDescriptor" : "prof:hasResource"
+"prof:ResourceDescriptor" -->  "dct:MediaTypeOrExtend" : "dct:format"
+"prof:ResourceDescriptor" -->  "prof:ResourceRole" : "prof:hasRole"
+"prof:ResourceDescriptor" -->  "rdfs:Resource" : "prof:hasArtifact"
+
+
+@enduml

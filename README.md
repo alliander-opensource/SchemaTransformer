@@ -1,5 +1,12 @@
 # Schema transformer
 
+// PlantUMLServer: Render diagrams by server which is specified with "plantuml.server". It's much faster, but requires a server.
+// Local is the default configuration.
+"plantuml.render": "PlantUMLServer",
+
+// Plantuml server to generate UML diagrams on-the-fly.
+"plantuml.server": "http://www.plantuml.com/plantuml",
+
 Facilitates automatically generating schema's (Avro, Json) from profiles  ([dx-prof](https://www.w3.org/TR/dx-prof/)/CIM -501 using rdfs/owl+shacl).
 
 ## Architecture of the generators
@@ -7,7 +14,7 @@ Facilitates automatically generating schema's (Avro, Json) from profiles  ([dx-p
 
 ## Vocabulary and Constraints used to define a profile
 
-To define the profile metadata the following constructs are used for the transformation:\
+To define the profile metadata the following constructs are used for the transformation:
 
 | Profile (based on [dx-prof](https://www.w3.org/TR/dx-prof/)) |
 | --- |
@@ -27,6 +34,7 @@ To define the vocabulary of the profile, the following constructs will be used f
 | [owl:Class](http://www.w3.org/2002/07/owl#Class) |
 | [owl:DatatypeProperty](http://www.w3.org/2002/07/owl#DatatypeProperty) |
 | [owl:ObjectProperty](http://www.w3.org/2002/07/owl#ObjectProperty) |
+| [owl:NamedIndividual](http://www.w3.org/2002/07/owl#NamedIndividual) | 
 | [rdf:type](http://www.w3.org/1999/02/22-rdf-syntax-ns#type) |
 | [rdfs:comment](http://www.w3.org/2000/01/rdf-schema#comment) |
 | [rdfs:range](http://www.w3.org/2000/01/rdf-schema#range) |
