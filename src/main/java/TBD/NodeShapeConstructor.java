@@ -15,13 +15,13 @@ public class NodeShapeConstructor {
     private final Set<Resource> propertyNodes;
     private final List<NodeShape> nodeShapeList;
 
-    public NodeShapeConstructor(List<Model> constraints){
+    public NodeShapeConstructor(List<Model> constraints) {
         nodes = extractUniqueNodeShapes(constraints);
         propertyNodes = extractUniquePropertyNodes(constraints);
         nodeShapeList = constructNodeShapes(constraints);
     }
 
-    private Set<IRI> extractUniqueNodeShapes(List<Model> constraints){
+    private Set<IRI> extractUniqueNodeShapes(List<Model> constraints) {
         IRI predicate = Values.iri("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
         IRI object = Values.iri("http://www.w3.org/ns/shacl#NodeShape");
 
@@ -33,7 +33,7 @@ public class NodeShapeConstructor {
                 .collect(Collectors.toSet());
     }
 
-    private Set<Resource> extractUniquePropertyNodes(List<Model> constraints){
+    private Set<Resource> extractUniquePropertyNodes(List<Model> constraints) {
         IRI predicate = Values.iri("http://www.w3.org/ns/shacl#property");
         Set<Resource> result = new HashSet<>();
 
@@ -47,7 +47,7 @@ public class NodeShapeConstructor {
         return result;
     }
 
-    private String extractTargetClass(List<Model> constraints, IRI node){
+    private String extractTargetClass(List<Model> constraints, IRI node) {
         IRI targetClassPredicate = Values.iri("http://www.w3.org/ns/shacl#TargetClass");
         final String[] targetClass = {null};
         this.propertyNodes.forEach(pNode ->
@@ -59,7 +59,7 @@ public class NodeShapeConstructor {
         return targetClass[0];
     }
 
-    private List<NodeShape> constructNodeShapes(List<Model> constraints){
+    private List<NodeShape> constructNodeShapes(List<Model> constraints) {
         List<NodeShape> nodeShapeList = new ArrayList<>();
 
         this.nodes.forEach(node -> {
@@ -76,7 +76,7 @@ public class NodeShapeConstructor {
         return nodeShapeList;
     }
 
-    private Property extractPropertyNodeAttributes(Resource pNode, List<Model> constraints){
+    private Property extractPropertyNodeAttributes(Resource pNode, List<Model> constraints) {
         IRI pathPredicate = Values.iri("http://www.w3.org/ns/shacl#path");
         IRI nodePredicate = Values.iri("http://www.w3.org/ns/shacl#node");
         IRI minCountPredicate = Values.iri("http://www.w3.org/ns/shacl#minCount");
@@ -84,60 +84,60 @@ public class NodeShapeConstructor {
         IRI datatypePredicate = Values.iri("http://www.w3.org/ns/shacl#datatype");
         IRI enumerationPredicate = Values.iri("http://www.w3.org/ns/shacl#in");
 
-            String path = null;
-            String node = null;
-            String datatype = null;
-            String minCount = "0";
-            String maxCount = "*";
-            List<String> enumerationList = new ArrayList<>();
+        String path = null;
+        String node = null;
+        String datatype = null;
+        String minCount = "0";
+        String maxCount = "*";
+        List<String> enumerationList = new ArrayList<>();
 
-            for (Model constraint : constraints) {
-                Model pNodeInfo = constraint.filter(pNode, null, null);
-                for (Statement st : pNodeInfo){
-                    if(st.getPredicate().equals(pathPredicate)){
-                        path = st.getObject().stringValue();
-                    }
-                    if(st.getPredicate().equals(nodePredicate)){
-                        node = st.getObject().stringValue();
-                    }
-                    if(st.getPredicate().equals(datatypePredicate)){
-                        datatype = st.getObject().stringValue();
-                    }
-                    if(st.getPredicate().equals(minCountPredicate)){
-                        minCount = st.getObject().stringValue();
-                    }
-                    if(st.getPredicate().equals(maxCountPredicate)){
-                        maxCount = st.getObject().stringValue();
-                    }
-                    if(st.getPredicate().equals(enumerationPredicate)){
-                        propertyListConstructor((Resource) st.getObject(), constraints, enumerationList);
-                    }
+        for (Model constraint : constraints) {
+            Model pNodeInfo = constraint.filter(pNode, null, null);
+            for (Statement st : pNodeInfo) {
+                if (st.getPredicate().equals(pathPredicate)) {
+                    path = st.getObject().stringValue();
+                }
+                if (st.getPredicate().equals(nodePredicate)) {
+                    node = st.getObject().stringValue();
+                }
+                if (st.getPredicate().equals(datatypePredicate)) {
+                    datatype = st.getObject().stringValue();
+                }
+                if (st.getPredicate().equals(minCountPredicate)) {
+                    minCount = st.getObject().stringValue();
+                }
+                if (st.getPredicate().equals(maxCountPredicate)) {
+                    maxCount = st.getObject().stringValue();
+                }
+                if (st.getPredicate().equals(enumerationPredicate)) {
+                    propertyListConstructor((Resource) st.getObject(), constraints, enumerationList);
                 }
             }
-            return constructPropertyShape(path, node, datatype, minCount, maxCount, enumerationList);
+        }
+        return constructPropertyShape(path, node, datatype, minCount, maxCount, enumerationList);
     }
 
-    private void propertyListConstructor(Resource firstNode,List<Model> constraints, List<String> resultList){
+    private void propertyListConstructor(Resource firstNode, List<Model> constraints, List<String> resultList) {
         IRI enumFirstPredicate = Values.iri("http://www.w3.org/1999/02/22-rdf-syntax-ns#first");
         IRI enumRestPredicate = Values.iri("http://www.w3.org/1999/02/22-rdf-syntax-ns#rest");
         IRI enumEndObject = Values.iri("http://www.w3.org/1999/02/22-rdf-syntax-ns#nil");
-        for(Model m : constraints){
+        for (Model m : constraints) {
             Model pEnumInfo = m.filter(firstNode, null, null);
-            for(Statement st : pEnumInfo){
-                if(st.getPredicate().equals(enumFirstPredicate)){
+            for (Statement st : pEnumInfo) {
+                if (st.getPredicate().equals(enumFirstPredicate)) {
                     resultList.add(st.getObject().stringValue());
                 }
-                if(st.getObject().equals(enumEndObject)){
+                if (st.getObject().equals(enumEndObject)) {
                     return;
                 }
-                if(st.getPredicate().equals(enumRestPredicate)){
+                if (st.getPredicate().equals(enumRestPredicate)) {
                     propertyListConstructor((Resource) st.getObject(), constraints, resultList);
                 }
             }
         }
     }
 
-    private Property constructPropertyShape(String path, String node, String datatype, String minCount, String maxCount, List<String> enumerationList){
+    private Property constructPropertyShape(String path, String node, String datatype, String minCount, String maxCount, List<String> enumerationList) {
         return new Property.Builder(path)
                 .node(node)
                 .dataType(datatype)
