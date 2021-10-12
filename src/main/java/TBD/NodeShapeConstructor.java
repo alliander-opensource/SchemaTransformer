@@ -73,15 +73,31 @@ public class NodeShapeConstructor {
                             .filter(st -> st.getSubject().equals(node))
                             .filter(st -> st.getObject().equals(pNode))
                             .forEach(st -> propertyList.add(extractPropertyNodeAttributes(pNode, constraints))));
-            constraints.stream()
-                    .flatMap(Collection::stream)
-                    .filter(st -> st.getSubject().equals(node))
-                    .filter(st -> st.getPredicate().equals(enumerationPredicate))
-                    .forEach(st -> enumerationToList((Resource) st.getObject(), constraints, nodeEnumeration));
-            nodeShapeList.add(new NodeShape(node.stringValue(), extractTargetClass(constraints, node), nodeEnumeration, propertyList));
+
+            nodeShapeEnumeration(constraints, node, nodeEnumeration);
+            nodeShapeList.add(new NodeShape(node.stringValue(), extractTargetClass(constraints, node), isRootObject(constraints, node), nodeEnumeration, propertyList));
         });
 
         return nodeShapeList;
+    }
+
+    private Boolean isRootObject(List<Model> constraints, IRI node) {
+        IRI rootObjectPredicate = Values.iri("http://www.w3.org/2000/01/rdf-schema#comment");
+        final String[] rootObject = {null};
+        constraints.stream()
+                .flatMap(Collection::stream)
+                .filter(st -> st.getSubject().equals(node))
+                .filter(st -> st.getPredicate().equals(rootObjectPredicate))
+                .forEach(st -> rootObject[0] = st.getObject().stringValue());
+        return Objects.equals(rootObject[0], "RootObject");
+    }
+
+    private void nodeShapeEnumeration(List<Model> constraints, IRI node, List<String> nodeEnumeration) {
+        constraints.stream()
+                .flatMap(Collection::stream)
+                .filter(st -> st.getSubject().equals(node))
+                .filter(st -> st.getPredicate().equals(enumerationPredicate))
+                .forEach(st -> enumerationToList((Resource) st.getObject(), constraints, nodeEnumeration));
     }
 
     private Property extractPropertyNodeAttributes(Resource pNode, List<Model> constraints) {
