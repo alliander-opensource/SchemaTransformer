@@ -1,0 +1,246 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="https://w3id.org/schematransform/ExampleShape#"
+     xml:base="https://w3id.org/schematransform/ExampleShape"
+     xmlns:sh="http://www.w3.org/ns/shacl#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:shape="https://w3id.org/schematransform/ExampleShape#"
+     xmlns:vocab="https://w3id.org/schematransform/ExampleVocabulary#">
+    <owl:Ontology/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Annotation properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.w3.org/ns/shacl#TargetClass -->
+
+    <owl:AnnotationProperty rdf:about="http://www.w3.org/ns/shacl#TargetClass"/>
+    
+
+
+    <!-- http://www.w3.org/ns/shacl#datatype -->
+
+    <owl:AnnotationProperty rdf:about="http://www.w3.org/ns/shacl#datatype"/>
+    
+
+
+    <!-- http://www.w3.org/ns/shacl#in -->
+
+    <owl:AnnotationProperty rdf:about="http://www.w3.org/ns/shacl#in"/>
+    
+
+
+    <!-- http://www.w3.org/ns/shacl#maxCount -->
+
+    <owl:AnnotationProperty rdf:about="http://www.w3.org/ns/shacl#maxCount"/>
+    
+
+
+    <!-- http://www.w3.org/ns/shacl#minCount -->
+
+    <owl:AnnotationProperty rdf:about="http://www.w3.org/ns/shacl#minCount"/>
+    
+
+
+    <!-- http://www.w3.org/ns/shacl#node -->
+
+    <owl:AnnotationProperty rdf:about="http://www.w3.org/ns/shacl#node"/>
+    
+
+
+    <!-- http://www.w3.org/ns/shacl#path -->
+
+    <owl:AnnotationProperty rdf:about="http://www.w3.org/ns/shacl#path"/>
+    
+
+
+    <!-- http://www.w3.org/ns/shacl#property -->
+
+    <owl:AnnotationProperty rdf:about="http://www.w3.org/ns/shacl#property"/>
+    
+
+
+    <!-- http://www.w3.org/ns/shacl#targetClass -->
+
+    <owl:AnnotationProperty rdf:about="http://www.w3.org/ns/shacl#targetClass"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.w3.org/ns/shacl#NodeShape -->
+
+    <owl:Class rdf:about="http://www.w3.org/ns/shacl#NodeShape"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- https://w3id.org/schematransform/ExampleShape#AShape -->
+
+    <owl:NamedIndividual rdf:about="https://w3id.org/schematransform/ExampleShape#AShape">
+        <rdf:type rdf:resource="http://www.w3.org/ns/shacl#NodeShape"/>
+        <sh:property>
+            <rdf:Description>
+                <sh:datatype rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+                <sh:maxCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">5</sh:maxCount>
+                <sh:minCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">0</sh:minCount>
+                <sh:path rdf:resource="https://w3id.org/schematransform/ExampleVocabulary#abc"/>
+            </rdf:Description>
+        </sh:property>
+        <sh:property>
+            <rdf:Description>
+                <sh:maxCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</sh:maxCount>
+                <sh:minCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</sh:minCount>
+                <sh:node rdf:resource="https://w3id.org/schematransform/ExampleShape#CShape"/>
+                <sh:path rdf:resource="https://w3id.org/schematransform/ExampleVocabulary#FromAtoC"/>
+            </rdf:Description>
+        </sh:property>
+        <sh:property>
+            <rdf:Description>
+                <sh:datatype rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+                <sh:maxCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</sh:maxCount>
+                <sh:minCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</sh:minCount>
+                <sh:path rdf:resource="https://w3id.org/schematransform/ExampleVocabulary#id"/>
+            </rdf:Description>
+        </sh:property>
+        <sh:targetClass rdf:resource="https://w3id.org/schematransform/ExampleVocabulary#A"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- https://w3id.org/schematransform/ExampleShape#BShape -->
+
+    <owl:NamedIndividual rdf:about="https://w3id.org/schematransform/ExampleShape#BShape">
+        <rdf:type rdf:resource="http://www.w3.org/ns/shacl#NodeShape"/>
+        <sh:property>
+            <rdf:Description>
+                <sh:datatype rdf:resource="http://www.w3.org/2001/XMLSchema#double"/>
+                <sh:minCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">2</sh:minCount>
+                <sh:path rdf:resource="https://w3id.org/schematransform/ExampleVocabulary#bcd"/>
+            </rdf:Description>
+        </sh:property>
+        <sh:property>
+            <rdf:Description>
+                <sh:maxCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</sh:maxCount>
+                <sh:minCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</sh:minCount>
+                <sh:node rdf:resource="https://w3id.org/schematransform/ExampleShape#DShape"/>
+                <sh:path rdf:resource="https://w3id.org/schematransform/ExampleVocabulary#FromBtoDButSomehowDifferent"/>
+            </rdf:Description>
+        </sh:property>
+        <sh:property>
+            <rdf:Description>
+                <sh:maxCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</sh:maxCount>
+                <sh:minCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">0</sh:minCount>
+                <sh:node rdf:resource="https://w3id.org/schematransform/ExampleShape#DShape"/>
+                <sh:path rdf:resource="https://w3id.org/schematransform/ExampleVocabulary#FromBtoD"/>
+            </rdf:Description>
+        </sh:property>
+        <sh:property>
+            <rdf:Description>
+                <sh:datatype rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+                <sh:maxCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</sh:maxCount>
+                <sh:minCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</sh:minCount>
+                <sh:path rdf:resource="https://w3id.org/schematransform/ExampleVocabulary#id"/>
+            </rdf:Description>
+        </sh:property>
+        <sh:targetClass rdf:resource="https://w3id.org/schematransform/ExampleVocabulary#B"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- https://w3id.org/schematransform/ExampleShape#CShape -->
+
+    <owl:NamedIndividual rdf:about="https://w3id.org/schematransform/ExampleShape#CShape">
+        <rdf:type rdf:resource="http://www.w3.org/ns/shacl#NodeShape"/>
+        <sh:in>
+            <rdf:Description/>
+        </sh:in>
+        <sh:targetClass rdf:resource="https://w3id.org/schematransform/ExampleVocabulary#C"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- https://w3id.org/schematransform/ExampleShape#DShape -->
+
+    <owl:NamedIndividual rdf:about="https://w3id.org/schematransform/ExampleShape#DShape">
+        <rdf:type rdf:resource="http://www.w3.org/ns/shacl#NodeShape"/>
+        <sh:property>
+            <rdf:Description>
+                <sh:datatype rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+                <sh:maxCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</sh:maxCount>
+                <sh:minCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</sh:minCount>
+                <sh:path rdf:resource="https://w3id.org/schematransform/ExampleVocabulary#id"/>
+            </rdf:Description>
+        </sh:property>
+        <sh:property>
+            <rdf:Description>
+                <sh:datatype rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+                <sh:maxCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</sh:maxCount>
+                <sh:minCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">0</sh:minCount>
+                <sh:path rdf:resource="https://w3id.org/schematransform/ExampleVocabulary#def"/>
+            </rdf:Description>
+        </sh:property>
+        <sh:property>
+            <rdf:Description>
+                <sh:maxCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">3</sh:maxCount>
+                <sh:minCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</sh:minCount>
+                <sh:node rdf:resource="https://w3id.org/schematransform/ExampleShape#BShape"/>
+                <sh:path rdf:resource="https://w3id.org/schematransform/ExampleVocabulary#fromDtoB"/>
+            </rdf:Description>
+        </sh:property>
+        <sh:targetClass rdf:resource="https://w3id.org/schematransform/ExampleVocabulary#D"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- https://w3id.org/schematransform/ExampleShape#EShape -->
+
+    <owl:NamedIndividual rdf:about="https://w3id.org/schematransform/ExampleShape#EShape">
+        <rdf:type rdf:resource="http://www.w3.org/ns/shacl#NodeShape"/>
+        <sh:TargetClass rdf:resource="https://w3id.org/schematransform/ExampleVocabulary#E"/>
+        <sh:property>
+            <rdf:Description>
+                <sh:maxCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</sh:maxCount>
+                <sh:minCount rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">0</sh:minCount>
+                <sh:node rdf:resource="https://w3id.org/schematransform/ExampleShape#CShape"/>
+                <sh:path rdf:resource="https://w3id.org/schematransform/ExampleVocabulary#fromEtoC"/>
+            </rdf:Description>
+        </sh:property>
+    </owl:NamedIndividual>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi -->
+
