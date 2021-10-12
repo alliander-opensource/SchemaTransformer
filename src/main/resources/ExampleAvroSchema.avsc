@@ -5,6 +5,10 @@
     "aliases": ["Bb"],
     "fields" : [
         {
+            "name" : "id",
+            "type" : string
+        },
+        {
             "name" : "abc",
             "type" :[
                 "null",
@@ -36,6 +40,10 @@
                 "aliases": ["Dd"],
                 "doc" : "This is yet another class", 
                 "fields" : [
+                    {
+                        "name" : "id",
+                        "type" : string
+                    },
                     {
                         "name" : "def",
                         "type" : ["null", "int"] 
