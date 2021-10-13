@@ -1,4 +1,4 @@
-@startuml
+@startuml ConstraintDiagram
 
 class "sh:Shape"
 class "owl:Class"
@@ -27,7 +27,7 @@ abstract class "owl:Thing" {
 "sh:NodeShape" --> "sh:PropertyShape" : "sh:property"
 "sh:NodeShape" --> "owl:Class" : "sh:targetClass"
 "sh:PropertyShape" -> "rdf:Property" : "sh:path"
-"sh:PropertyShape" -> "rdf:List" : "sh:in"
+"sh:Shape" -> "rdf:List" : "sh:in"
 "sh:PropertyShape" -> "sh:NodeShape" : "sh:node"
 "sh:PropertyShape" -> "rdfs:Datatype" : "sh:datatype"
 

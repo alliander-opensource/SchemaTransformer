@@ -27,6 +27,8 @@ To define the profile metadata the following constructs are used for the transfo
 |[role:constrains](http://www.w3.org/ns/dx/prof/role/constraints)|
 |[role:vocabulary](http://www.w3.org/ns/dx/prof/role/vocabulary)|
 
+![Profile Diagram](./documentation/figures/ProfileDiagram.svg "Profile Diagram")
+
 To define the vocabulary of the profile, the following constructs will be used for the transformation:
 
 | Vocabulary (owl, rdfs, rdf) |
@@ -43,6 +45,8 @@ To define the vocabulary of the profile, the following constructs will be used f
 | [rdfs:subClassOf](http://www.w3.org/2000/01/rdf-schema#subClassOf) |
 | [rdfs:subPropertyOf](http://www.w3.org/2000/01/rdf-schema#subPropertyOf) |
 
+![Vocabulary Diagram](./documentation/figures/VocabularyDiagram.svg "Vocabulary Diagram")
+
 To define the constraints, the following constructs will be used for the transformation:
 
 | Constraints (shacl) |
@@ -56,6 +60,8 @@ To define the constraints, the following constructs will be used for the transfo
 | [sh:path](http://www.w3.org/ns/shacl#path) | 
 | [sh:in](http://www.w3.org/ns/shacl#in) | 
 | [sh:node](http://www.w3.org/ns/shacl#node) |
+
+![Constraint Diagram](./documentation/figures/ConstraintDiagram.svg "Constraint Diagram")
 
 
 ## Mapping specifications from rdfs/owl+shacl to schema's
