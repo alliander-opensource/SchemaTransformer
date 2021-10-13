@@ -1,13 +1,5 @@
 # Schema transformer
 
-// PlantUMLServer: Render diagrams by server which is specified with "plantuml.server". It's much faster, but requires a server.
-// Local is the default configuration.
-"plantuml.render": "PlantUMLServer",
-
-// Plantuml server to generate UML diagrams on-the-fly.
-"plantuml.server": "http://www.plantuml.com/plantuml",
-
-Facilitates automatically generating schema's (Avro, Json) from profiles  ([dx-prof](https://www.w3.org/TR/dx-prof/)/CIM -501 using rdfs/owl+shacl).
 
 ## Architecture of the generators
 ![Architectural overview of the generators](./documentation/figures/ArchitectureOverview.png "Architecture")
