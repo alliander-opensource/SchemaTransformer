@@ -51,14 +51,7 @@ public class NodeShapeConstructor {
 
     private String extractTargetClass(List<Model> constraints, IRI node) {
         IRI targetClassPredicate = Values.iri("http://www.w3.org/ns/shacl#targetClass");
-        final String[] targetClass = {null};
-        this.propertyNodes.forEach(pNode ->
-                constraints.stream()
-                        .flatMap(Collection::stream)
-                        .filter(st -> st.getPredicate().equals(targetClassPredicate))
-                        .filter(st -> st.getSubject().equals(node))
-                        .forEach(st -> targetClass[0] = st.getObject().stringValue()));
-        return targetClass[0];
+        return matchOnlyOne(constraints, node, targetClassPredicate);
     }
 
     private List<NodeShape> constructNodeShapes(List<Model> constraints) {
@@ -83,13 +76,17 @@ public class NodeShapeConstructor {
 
     private Boolean isRootObject(List<Model> constraints, IRI node) {
         IRI rootObjectPredicate = Values.iri("http://www.w3.org/2000/01/rdf-schema#comment");
-        final String[] rootObject = {null};
+        return Objects.equals(matchOnlyOne(constraints, node, rootObjectPredicate), "RootObject");
+    }
+
+    private String matchOnlyOne(List<Model> constraints, IRI node, IRI predicate){
+        final String[] match = {null};
         constraints.stream()
                 .flatMap(Collection::stream)
                 .filter(st -> st.getSubject().equals(node))
-                .filter(st -> st.getPredicate().equals(rootObjectPredicate))
-                .forEach(st -> rootObject[0] = st.getObject().stringValue());
-        return Objects.equals(rootObject[0], "RootObject");
+                .filter(st -> st.getPredicate().equals(predicate))
+                .forEach(st -> match[0] = st.getObject().stringValue());
+        return match[0];
     }
 
     private void nodeShapeEnumeration(List<Model> constraints, IRI node, List<String> nodeEnumeration) {
