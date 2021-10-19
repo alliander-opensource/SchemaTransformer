@@ -1,12 +1,12 @@
 {
     "type" : "record" ,
     "name" : "B" ,
-    "doc" : "This is a sub-class"
+    "doc" : "This is a sub-class",
     "aliases": ["Bb"],
     "fields" : [
         {
             "name" : "id",
-            "type" : string
+            "type" : "string"
         },
         {
             "name" : "abc",
@@ -24,10 +24,10 @@
             "items" : "double"
         },
         {
-            "name" : "FromAtoC"
+            "name" : "FromAtoC",
             "type" : {
                 "name" : "C",
-                "aliases" ["Cc"], 
+                "aliases" : ["Cc"], 
                 "doc" : "This is a class with named elements", 
                 "Symbols" : ["individual1","individual2", "individual3" ]
             }
@@ -42,7 +42,7 @@
                 "fields" : [
                     {
                         "name" : "id",
-                        "type" : string
+                        "type" : "string"
                     },
                     {
                         "name" : "def",
