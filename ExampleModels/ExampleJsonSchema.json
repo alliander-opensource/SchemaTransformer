@@ -20,9 +20,12 @@
         "A": {
             "additionalProperties": false,
             "type": "object",
+            "description" : "This is a super class" ,
+            "modelReference" : "https://w3id.org/schematransform/ExampleVocabulary#A",
             "properties": {
                 "abc": {
                     "type": "array",
+                    "modelReference" : "https://w3id.org/schematransform/ExampleVocabulary#abc",
                     "items": {
                         "type": "string"
                     },
@@ -30,6 +33,7 @@
                     "maxItems": 5
                 },
                 "FromAToC": {
+                    "modelReference" : "https://w3id.org/schematransform/ExampleVocabulary#FromAToC",
                     "$ref": "#/definitions/C"
                 }
             }
@@ -37,6 +41,8 @@
         "B": {
             "additionalProperties": false,
             "type": "object",
+            "modelReference" : "https://w3id.org/schematransform/ExampleVocabulary#B",
+            "description" : "This is a sub-class",
             "allOf": [
                 {
                     "$ref": "#/definitions/A"
@@ -44,7 +50,8 @@
             ],
             "properties": {
                 "bcd": {
-                    "type": "arrray",
+                    "type": "array",
+                    "modelReference" : "https://w3id.org/schematransform/ExampleVocabulary#bcd",
                     "items": {
                         "type": "string"
                     },
@@ -52,6 +59,8 @@
                 },
                 "FromBToD": {
                     "type": "array",
+                    "modelReference" : "https://w3id.org/schematransform/ExampleVocabulary#FromDtoB" , 
+                    "description": "Association from D to B",
                     "items": {
                         "$ref": "#/definitions/C"
                     },
@@ -62,6 +71,8 @@
         },
         "C" : {
             "type": "string",
+            "modelReference" : "https://w3id.org/schematransform/ExampleVocabulary#C",
+            "description" : "This is a class with named elements", 
             "enum": [
                 "individual1",
                 "individual2",
