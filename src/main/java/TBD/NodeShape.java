@@ -1,21 +1,17 @@
 package TBD;
 
+import lombok.Builder;
+import lombok.Getter;
+import org.apache.avro.reflect.Nullable;
+
 import java.util.List;
 
+@Builder
+@Getter
 public class NodeShape {
-
-    private final String nodeShapeID;
-    private final String targetClass;
-    private final boolean rootObject;
-    private final List<String> enumeration;
-    private final List<Property> propertyList;
-
-    public NodeShape(String nodeShapeID, String targetClass, boolean rootObject, List<String> enumeration, List<Property> propertyList){
-        this.nodeShapeID = nodeShapeID;
-        this.targetClass = targetClass;
-        this.rootObject = rootObject;
-        this.enumeration = enumeration;
-        this.propertyList = propertyList;
-    }
-
+    private String nodeShapeID;
+    private String targetClass;
+    private boolean rootObject;
+    private List<String> enumeration;
+    private List<Property> propertyList;
 }
