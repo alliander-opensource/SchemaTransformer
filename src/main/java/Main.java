@@ -1,6 +1,7 @@
 import Consumer.FileReader;
 import Consumer.RDFMap;
 import TBD.NodeShapeConstructor;
+import Transformers.Avro;
 import org.eclipse.rdf4j.model.Model;
 
 import java.io.IOException;
@@ -12,5 +13,11 @@ public class Main{
         RDFMap rdfMap = new RDFMap(fileReader.getRDFFiles());
         List<Model> modelList = rdfMap.getConstraints();
         NodeShapeConstructor nodeShapeConstructor = new NodeShapeConstructor(modelList);
+        Avro avro = new Avro();
+
+        avro.buildSchema(nodeShapeConstructor.getNodeShapeList().get(0));
+        avro.buildRecord(nodeShapeConstructor.getNodeShapeList().get(0));
+
+
     }
 }

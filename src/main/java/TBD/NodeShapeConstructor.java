@@ -68,7 +68,13 @@ public class NodeShapeConstructor {
                             .forEach(st -> propertyList.add(extractPropertyNodeAttributes(pNode, constraints))));
 
             nodeShapeEnumeration(constraints, node, nodeEnumeration);
-            nodeShapeList.add(new NodeShape(node.stringValue(), extractTargetClass(constraints, node), isRootObject(constraints, node), nodeEnumeration, propertyList));
+            nodeShapeList.add(NodeShape.builder()
+                    .nodeShapeID(extractNameFromIRI(node.stringValue()))
+                    .targetClass(extractNameFromIRI(extractTargetClass(constraints, node)))
+                    .rootObject(isRootObject(constraints, node))
+                    .enumeration(nodeEnumeration)
+                    .propertyList(propertyList)
+                    .build());
         });
 
         return nodeShapeList;
@@ -157,11 +163,18 @@ public class NodeShapeConstructor {
         }
     }
 
+    private String extractNameFromIRI(String iri){
+        String name = iri;
+        if (iri != null) name = iri.split("#")[1];
+        return name;
+    }
+
     private Property constructPropertyShape(String path, String node, String datatype, String minCount, String maxCount, List<String> enumerationList) {
-        return new Property.Builder(path)
-                .node(node)
-                .dataType(datatype)
-                .minCount(minCount)
+        return Property.builder()
+                .path(extractNameFromIRI(path))
+                .node(extractNameFromIRI(node))
+                .dataType(extractNameFromIRI(datatype))
+                .minCount(minCount )
                 .maxCount(maxCount)
                 .in(enumerationList)
                 .build();
