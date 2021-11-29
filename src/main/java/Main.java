@@ -16,7 +16,7 @@ public class Main{
         Avro avro = new Avro();
 
         avro.buildSchema(nodeShapeConstructor.getNodeShapeList().get(0));
-        avro.buildRecord(nodeShapeConstructor.getNodeShapeList().get(0));
+        avro.buildBaseRecord(nodeShapeConstructor.getNodeShapeList());
 
 
     }
