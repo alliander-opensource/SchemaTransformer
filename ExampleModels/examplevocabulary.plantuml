@@ -1,0 +1,23 @@
+@startuml
+
+class "A<https://w3id.org/schematransform/ExampleVocabulary#>"{
+    abc
+}
+class "E<https://w3id.org/schematransform/ExampleVocabulary#>"{
+}
+A <|-- E
+class "B<https://w3id.org/schematransform/ExampleVocabulary#>"{
+    bcd
+}
+A <|-- B
+class "D<https://w3id.org/schematransform/ExampleVocabulary#>"{
+    def
+}
+class "C<https://w3id.org/schematransform/ExampleVocabulary#>"{
+}
+D o-- B : FromDtoB
+A o-- D : FromAToC
+E o-- Undefined : FromEtoC
+B o-- D : FromBtoD
+B o-- D : FromBtoDButSomehowDifferent
+@enduml

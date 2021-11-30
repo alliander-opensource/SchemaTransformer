@@ -1,0 +1,41 @@
+@startuml AvroSchmea
+
+abstract class PrimitiveType
+abstract class Complextype
+abstract class Type {
+    name : string
+    doc : string
+    
+}
+
+class field
+class record 
+class enum
+class array
+class union
+
+Type <-- PrimitiveType
+Type <-- Complextype
+
+
+PrimitiveType <-- string
+PrimitiveType <-- null
+PrimitiveType <-- boolean
+PrimitiveType <-- int
+PrimitiveType <-- long
+PrimitiveType <-- float 
+PrimitiveType <-- double
+PrimitiveType <-- bytes
+
+
+Complextype <-- record
+Complextype <-- enum
+Complextype <-- array
+Complextype <-- union
+
+Type --> jsonArray : aliasses
+
+
+
+
+@enduml

@@ -50,6 +50,11 @@
                     }
                 ]
             }
+        },
+         {
+            "name" : "FromBtoDBut" ,
+            "doc": "Association from B to D" ,
+            "type" : "D"
         }
     ]
 }

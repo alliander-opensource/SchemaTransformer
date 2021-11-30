@@ -83,6 +83,8 @@
         "D" : {
             "type": "object",
             "additionalProperties": false,
+            "modelReference" : "https://w3id.org/schematransform/ExampleVocabulary#D",
+            "description": "This is yet another class",
             "properties": {
                 "def" : {
                     "type": "integer"

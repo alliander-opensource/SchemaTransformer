@@ -1,32 +1,24 @@
-@startuml
+@startuml VocabularyDiagram
 
-class "owl:Class" [[http://www.w3.org/2000/01/rdf-schema#Class]] #LightGreen
-class "owl:DatatypeProperty" [[http://www.w3.org/2002/07/owl#DatatypeProperty]] #LightGreen
-class "owl:ObjectProperty" [[http://www.w3.org/2002/07/owl#ObjectProperty]] #LightGreen
-class "owl:TransitiveProperty" [[http://www.w3.org/2002/07/owl#TransitiveProperty]]
-class "owl:SymetricProperty" [[http://www.w3.org/2002/07/owl#TransitiveProperty]]
-class "owl:ReflexiveProperty" [[http://www.w3.org/2002/07/owl#ReflexiveProperty]]
-abstract class "rdf:Property" [[http://www.w3.org/1999/02/22-rdf-syntax-ns#Property]] #LightGreen
-class "rdfs:Datatype" [[http://www.w3.org/2000/01/rdf-schema#Datatype]] #LightGreen
-class "owl:NamedIndividual" [[http://www.w3.org/2002/07/owl#NamedIndividual]] #LightGreen
+class "owl:Class" [[http://www.w3.org/2000/01/rdf-schema#Class]] 
+class "owl:DatatypeProperty" [[http://www.w3.org/2002/07/owl#DatatypeProperty]] 
+class "owl:ObjectProperty" [[http://www.w3.org/2002/07/owl#ObjectProperty]] 
+abstract class "rdf:Property" [[http://www.w3.org/1999/02/22-rdf-syntax-ns#Property]]
+class "rdfs:Datatype" [[http://www.w3.org/2000/01/rdf-schema#Datatype]] 
+class "owl:NamedIndividual" [[http://www.w3.org/2002/07/owl#NamedIndividual]]
 abstract class "owl:Thing" [[http://www.w3.org/2002/07/owl#Thing]]{ 
   [[http://www.w3.org/2000/01/rdf-schema#label rdfs:label ]]: xsd:string
  [[http://www.w3.org/2000/01/rdf-schema#comment rdfs:comment ]]  : "xsd:string" 
 }
 
 "owl:Thing" <|--  "owl:Class"
-
-
 "owl:Thing" <|--   "rdf:Property"
 "owl:Thing" <|--   "rdfs:Datatype"
 "owl:Thing" <|--   "owl:NamedIndividual"
-"owl:NamedIndividual" <|-- "skos:Concept"
 "rdf:Property" <|-- "owl:DatatypeProperty"
 "rdf:Property" <|-- "owl:ObjectProperty"
 
-"owl:ObjectProperty" <|-- "owl:TransitiveProperty"
-"owl:ObjectProperty" <|-- "owl:SymetricProperty"
-"owl:ObjectProperty" <|-- "owl:ReflexiveProperty"
+
 
 "owl:ObjectProperty" --> "owl:ObjectProperty" : "owl:inverseOF"
 
@@ -38,8 +30,6 @@ abstract class "owl:Thing" [[http://www.w3.org/2002/07/owl#Thing]]{
 "owl:Class" --> "owl:Class" : "owl:equivalentClass"
 "rdf:Property" --> "rdf:Property" : "rdfs:subPropertyOf"
 "owl:Thing" --> "owl:Class" : "rdf:type"
-"owl:Class" -->  "skos:Concept" : "dct:subject"
-"rdf:Property" -->  "skos:Concept" : "dct:subject"
 "owl:NamedIndividual" --> "owl:NamedIndividual" : "owl:sameAs"
 "owl:NamedIndividual" --> "owl:NamedIndividual" : "owl:differentFrom"
 
