@@ -81,23 +81,14 @@ public class Avro {
     }
 
     public Schema buildRecordFields(Schema base, NodeShape rootObject, List<NodeShape> nodeShapeList) {
-        return buildRecordFields(base, rootObject, nodeShapeList, null, null);
-    }
-
-    public Schema buildRecordFields(Schema base, NodeShape rootObject, List<NodeShape> nodeShapeList, String minCount, String maxCount) {
         for (Property property : rootObject.getPropertyList()) {
             List<Schema.Field> baseFields = base.getFields().stream()
                     .map(field -> new Schema.Field(field.name(), field.schema(), field.doc(), field.defaultVal()))
                     .collect(Collectors.toList());
 
-            String _minCount = minCount != null ? minCount : property.getMinCount();
-            String _maxCount = maxCount != null ? maxCount : property.getMaxCount();
-
-            Schema schema = cardinalityToSchema(_minCount, _maxCount, property.getDataType(), property.getNode(), nodeShapeList);
+            Schema schema = cardinalityToSchema(property.getMinCount(), property.getMaxCount(), property.getDataType(), property.getNode(), nodeShapeList);
             if (schema != null) baseFields.add(new Schema.Field(property.getPath(), schema));
 
-//                baseFields.add(new Schema.Field("FromAToC", SchemaBuilder.builder().enumeration("C").aliases("Cc").doc("This is a class with named elements").symbols("individual1", "individual2", "individual3")));
-//                baseFields.add(new Schema.Field("FromBToD", SchemaBuilder.builder().record("D").doc("This is yet another class").fields().name("id").type().stringType().noDefault().name("def").type().unionOf().nullType().and().intType().endUnion().noDefault().endRecord()));
             Schema newSchema = Schema.createRecord(
                     base.getName(),
                     base.getDoc(),
@@ -144,10 +135,31 @@ public class Avro {
                         .fields()
                         .endRecord();
                 parents.add(targetNode);
-                schema = buildRecordFields(base, targetNode, nodeShapeList, _minCount.toString(), _maxCount.toString());
+                schema = buildRecordFields(base, targetNode, nodeShapeList);
+                schema = buildCardinalityRecord(_minCount, _maxCount, schema);
                 if (parents.get(parents.size() -1).equals(targetNode)) {
                     parents.remove(targetNode);
                 }
+            }
+        }
+        return schema;
+    }
+
+    private Schema buildCardinalityRecord(Integer minCount, Integer maxCount, Schema schema) {
+        // 1 - 1
+        schema = SchemaBuilder.builder().type(schema);
+        if (maxCount.equals(2)) {
+            if (minCount.equals(0)) {
+                // 0 - *
+                schema = SchemaBuilder.builder().unionOf().nullType().and().array().items().type(schema).endUnion();
+            } else {
+                // 1 - *
+                schema = SchemaBuilder.builder().array().items(schema);
+            }
+        } else {
+            if (minCount.equals(0)){
+                // 0 - 1
+                schema = SchemaBuilder.builder().unionOf().nullType().and().type(schema).endUnion();
             }
         }
         return schema;
