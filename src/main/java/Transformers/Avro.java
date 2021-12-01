@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 
 public class Avro {
 
+    List<NodeShape> parents = new ArrayList<>();
+
     public <T> GenericRecord pojoToRecord(T model) throws IOException {
         Schema schema = ReflectData.get().getSchema(model.getClass());
 
@@ -49,6 +51,9 @@ public class Avro {
                 .type().unionOf().nullType().and().record("D").aliases("Dd").doc("This is yet another class").fields()
                 .name("id").type().stringType().noDefault()
                 .name("def").type().unionOf().nullType().and().intType().endUnion().noDefault().endRecord().endUnion().noDefault()
+                .name("FromBToDButSomehowDifferent")
+                .doc("No clue")
+                .type("D").noDefault()
                 .endRecord();
         System.out.println("hello");
     }
@@ -60,6 +65,7 @@ public class Avro {
             if (ns.isRootObject()) rootObject = ns;
         }
         assert rootObject != null;
+        parents.add(rootObject);
 
         Schema base = SchemaBuilder
                 .record(rootObject.getTargetClass())
@@ -70,6 +76,7 @@ public class Avro {
 
         base = buildRecordFields(base, rootObject, nodeShapeList);
 
+        System.out.println("the end");
         return base;
     }
 
@@ -129,14 +136,18 @@ public class Avro {
             assert targetNode != null;
             if (!targetNode.getEnumeration().isEmpty()) {
                 schema = buildEnum(_minCount, _maxCount, targetNode);
-            } else if (!targetNode.getPropertyList().isEmpty()) {
+            } else if (!targetNode.getPropertyList().isEmpty() && !parents.contains(targetNode)) {
                 Schema base = SchemaBuilder
                         .record(targetNode.getTargetClass())
                         .doc("to be implemented")
                         .aliases("Bb")
                         .fields()
                         .endRecord();
+                parents.add(targetNode);
                 schema = buildRecordFields(base, targetNode, nodeShapeList, _minCount.toString(), _maxCount.toString());
+                if (parents.get(parents.size() -1).equals(targetNode)) {
+                    parents.remove(targetNode);
+                }
             }
         }
         return schema;
