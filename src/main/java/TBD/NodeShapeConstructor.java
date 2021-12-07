@@ -11,6 +11,8 @@ import java.util.*;
 public class NodeShapeConstructor {
 
     private final IRI enumerationPredicate = Values.iri("http://www.w3.org/ns/shacl#in");
+    private final IRI commentPredicate = Values.iri("http://www.w3.org/2000/01/rdf-schema#comment");
+    private final IRI labelPredicate = Values.iri("http://www.w3.org/2000/01/rdf-schema#label");
     private final Set<IRI> nodes;
     private final Set<Resource> propertyNodes;
     private final List<NodeShape> nodeShapeList;
