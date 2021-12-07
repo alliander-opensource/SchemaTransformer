@@ -12,6 +12,7 @@ public class Main{
         FileReader fileReader = new FileReader("src/main/resources");
         RDFMap rdfMap = new RDFMap(fileReader.getRDFFiles());
         List<Model> modelList = rdfMap.getConstraints();
+        List<Model> voca = rdfMap.getVocabularies();
         NodeShapeConstructor nodeShapeConstructor = new NodeShapeConstructor(modelList);
         Avro avro = new Avro();
 
