@@ -14,7 +14,7 @@
 #################################################################
 
 ###  https://w3id.org/schematransform/ExampleVocabulary#FromAToC
-vocab:FromAToC rdf:type owl:ObjectProperty ;
+vocab:FromAtoC rdf:type owl:ObjectProperty ;
                rdfs:domain vocab:A ;
                rdfs:range vocab:D ;
                rdfs:label "VanANaarC"@nl .

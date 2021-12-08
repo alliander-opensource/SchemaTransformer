@@ -2,7 +2,6 @@ package TBD;
 
 import lombok.Builder;
 import lombok.Getter;
-import org.apache.avro.reflect.Nullable;
 
 import java.util.List;
 
@@ -10,9 +9,11 @@ import java.util.List;
 @Getter
 public class Property {
     private String path;
-    private String dataType; //type
-    private String node; //record || enum
+    private String dataType;
+    private String node;
     private String minCount;
     private String maxCount;
+    private String doc;
+    private List<String> aliases;
     private List<String> in;
 }
