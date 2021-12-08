@@ -11,9 +11,9 @@ public class Main{
     public static void main(String[] args) throws IOException {
         FileReader fileReader = new FileReader("src/main/resources");
         RDFMap rdfMap = new RDFMap(fileReader.getRDFFiles());
-        List<Model> modelList = rdfMap.getConstraints();
-        List<Model> voca = rdfMap.getVocabularies();
-        NodeShapeConstructor nodeShapeConstructor = new NodeShapeConstructor(modelList);
+        List<Model> constraints = rdfMap.getConstraints();
+        List<Model> vocabularies = rdfMap.getVocabularies();
+        NodeShapeConstructor nodeShapeConstructor = new NodeShapeConstructor(constraints, vocabularies);
         Avro avro = new Avro();
 
         avro.buildSchema(nodeShapeConstructor.getNodeShapeList().get(0));

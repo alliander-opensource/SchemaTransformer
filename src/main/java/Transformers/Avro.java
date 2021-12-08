@@ -67,10 +67,11 @@ public class Avro {
         assert rootObject != null;
         parents.add(rootObject);
 
+        String[] aliases = rootObject.getAliases().toArray(new String[0]);
         Schema base = SchemaBuilder
                 .record(rootObject.getTargetClass())
-                .doc("to be implemented")
-                .aliases("Bb")
+                .doc(rootObject.getDoc())
+                .aliases(aliases)
                 .fields()
                 .endRecord();
 
@@ -86,7 +87,7 @@ public class Avro {
                     .map(field -> new Schema.Field(field.name(), field.schema(), field.doc(), field.defaultVal()))
                     .collect(Collectors.toList());
 
-            Schema schema = cardinalityToSchema(property.getMinCount(), property.getMaxCount(), property.getDataType(), property.getNode(), nodeShapeList);
+            Schema schema = cardinalityToSchema(property.getMinCount(), property.getMaxCount(), property.getDataType(), property.getNode(), property.getDoc(), property.getAliases(), nodeShapeList);
             if (schema != null) baseFields.add(new Schema.Field(property.getPath(), schema));
 
             Schema newSchema = Schema.createRecord(
@@ -99,12 +100,11 @@ public class Avro {
                 newSchema.addAlias(alias);
             }
             base = newSchema;
-            System.out.println("hello");
         }
         return base;
     }
 
-    private Schema cardinalityToSchema(String minCount, String maxCount, String dataType, String node, List<NodeShape> nodeShapeList) {
+    private Schema cardinalityToSchema(String minCount, String maxCount, String dataType, String node, String doc, List<String> aliases, List<NodeShape> nodeShapeList) {
         // normalize minCount and maxCount because from the dx-prof its perfectly normal to receive a 2-5 cardinality,
         // avro does not understand that, so we have to normalize it
         // if the min cardinality is greater or equal than 1 we normalize it to 1, 0 stays 0 obviously
@@ -128,16 +128,17 @@ public class Avro {
             if (!targetNode.getEnumeration().isEmpty()) {
                 schema = buildEnum(_minCount, _maxCount, targetNode);
             } else if (!targetNode.getPropertyList().isEmpty() && !parents.contains(targetNode)) {
+                String[] alias = aliases.toArray(new String[0]);
                 Schema base = SchemaBuilder
                         .record(targetNode.getTargetClass())
-                        .doc("to be implemented")
-                        .aliases("Bb")
+                        .doc(doc)
+                        .aliases(alias)
                         .fields()
                         .endRecord();
                 parents.add(targetNode);
                 schema = buildRecordFields(base, targetNode, nodeShapeList);
                 schema = buildCardinalityRecord(_minCount, _maxCount, schema);
-                if (parents.get(parents.size() -1).equals(targetNode)) {
+                if (parents.get(parents.size() - 1).equals(targetNode)) {
                     parents.remove(targetNode);
                 }
             }
@@ -157,7 +158,7 @@ public class Avro {
                 schema = SchemaBuilder.builder().array().items(schema);
             }
         } else {
-            if (minCount.equals(0)){
+            if (minCount.equals(0)) {
                 // 0 - 1
                 schema = SchemaBuilder.builder().unionOf().nullType().and().type(schema).endUnion();
             }
@@ -178,7 +179,7 @@ public class Avro {
                 schema = SchemaBuilder.builder().array().items().enumeration(targetNode.getTargetClass()).symbols(enumeration);
             }
         } else {
-            if (minCount.equals(0)){
+            if (minCount.equals(0)) {
                 // 0 - 1
                 schema = SchemaBuilder.builder().unionOf().nullType().and().enumeration(targetNode.getTargetClass()).symbols(enumeration).endUnion();
             }

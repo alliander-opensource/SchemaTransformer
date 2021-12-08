@@ -17,10 +17,10 @@ public class NodeShapeConstructor {
     private final Set<Resource> propertyNodes;
     private final List<NodeShape> nodeShapeList;
 
-    public NodeShapeConstructor(List<Model> constraints) {
+    public NodeShapeConstructor(List<Model> constraints, List<Model> vocabularies) {
         nodes = extractUniqueNodeShapes(constraints);
         propertyNodes = extractUniquePropertyNodes(constraints);
-        nodeShapeList = constructNodeShapes(constraints);
+        nodeShapeList = constructNodeShapes(constraints, vocabularies);
     }
 
     private Set<IRI> extractUniqueNodeShapes(List<Model> constraints) {
@@ -56,7 +56,7 @@ public class NodeShapeConstructor {
         return matchOnlyOne(constraints, node, targetClassPredicate);
     }
 
-    private List<NodeShape> constructNodeShapes(List<Model> constraints) {
+    private List<NodeShape> constructNodeShapes(List<Model> constraints, List<Model> vocabularies) {
         List<NodeShape> nodeShapeList = new ArrayList<>();
 
         this.nodes.forEach(node -> {
@@ -67,14 +67,17 @@ public class NodeShapeConstructor {
                             .flatMap(Collection::stream)
                             .filter(st -> st.getSubject().equals(node))
                             .filter(st -> st.getObject().equals(pNode))
-                            .forEach(st -> propertyList.add(extractPropertyNodeAttributes(pNode, constraints))));
+                            .forEach(st -> propertyList.add(extractPropertyNodeAttributes(pNode, constraints, vocabularies))));
 
             nodeShapeEnumeration(constraints, node, nodeEnumeration);
+            String targetClass = extractTargetClass(constraints, node);
             nodeShapeList.add(NodeShape.builder()
                     .nodeShapeID(extractNameFromIRI(node.stringValue()))
-                    .targetClass(extractNameFromIRI(extractTargetClass(constraints, node)))
+                    .targetClass(extractNameFromIRI(targetClass))
                     .rootObject(isRootObject(constraints, node))
                     .enumeration(nodeEnumeration)
+                    .doc(extractDoc(targetClass, vocabularies))
+                    .aliases(extractAliases(targetClass, vocabularies))
                     .propertyList(propertyList)
                     .build());
         });
@@ -87,7 +90,7 @@ public class NodeShapeConstructor {
         return Objects.equals(matchOnlyOne(constraints, node, rootObjectPredicate), "RootObject");
     }
 
-    private String matchOnlyOne(List<Model> constraints, IRI node, IRI predicate){
+    private String matchOnlyOne(List<Model> constraints, IRI node, IRI predicate) {
         final String[] match = {null};
         constraints.stream()
                 .flatMap(Collection::stream)
@@ -105,18 +108,20 @@ public class NodeShapeConstructor {
                 .forEach(st -> enumerationToList((Resource) st.getObject(), constraints, nodeEnumeration));
     }
 
-    private Property extractPropertyNodeAttributes(Resource pNode, List<Model> constraints) {
+    private Property extractPropertyNodeAttributes(Resource pNode, List<Model> constraints, List<Model> vocabularies) {
         IRI pathPredicate = Values.iri("http://www.w3.org/ns/shacl#path");
         IRI nodePredicate = Values.iri("http://www.w3.org/ns/shacl#node");
         IRI minCountPredicate = Values.iri("http://www.w3.org/ns/shacl#minCount");
         IRI maxCountPredicate = Values.iri("http://www.w3.org/ns/shacl#maxCount");
         IRI datatypePredicate = Values.iri("http://www.w3.org/ns/shacl#datatype");
 
+        String doc;
         String path = null;
         String node = null;
         String datatype = null;
         String minCount = "0";
         String maxCount = "*";
+        List<String> aliases;
         List<String> enumerationList = new ArrayList<>();
 
         for (Model constraint : constraints) {
@@ -142,7 +147,40 @@ public class NodeShapeConstructor {
                 }
             }
         }
-        return constructPropertyShape(path, node, datatype, minCount, maxCount, enumerationList);
+        aliases = extractAliases(path, vocabularies);
+        doc = extractDoc(path, vocabularies);
+
+        return constructPropertyShape(path, node, datatype, minCount, maxCount, doc, aliases, enumerationList);
+    }
+
+    private List<String> extractAliases(String identifier, List<Model> vocabularies) {
+        List<String> aliases = new ArrayList<>();
+        if (identifier != null) {
+            for (Model vocabulary : vocabularies) {
+                Model pNodeInfo = vocabulary.filter(Values.iri(identifier), null, null);
+                for (Statement st : pNodeInfo) {
+                    if (st.getPredicate().equals(labelPredicate)) {
+                        aliases.add(st.getObject().stringValue());
+                    }
+                }
+            }
+        }
+        return aliases;
+    }
+
+    private String extractDoc(String identifier, List<Model> vocabularies) {
+        String doc = null;
+        if (identifier != null) {
+            for (Model vocabulary : vocabularies) {
+                Model pNodeInfo = vocabulary.filter(Values.iri(identifier), null, null);
+                for (Statement st : pNodeInfo) {
+                    if (st.getPredicate().equals(commentPredicate)) {
+                        doc = st.getObject().stringValue();
+                    }
+                }
+            }
+        }
+        return doc;
     }
 
     private void enumerationToList(Resource firstNode, List<Model> constraints, List<String> resultList) {
@@ -165,19 +203,21 @@ public class NodeShapeConstructor {
         }
     }
 
-    private String extractNameFromIRI(String iri){
+    private String extractNameFromIRI(String iri) {
         String name = iri;
         if (iri != null) name = iri.split("#")[1];
         return name;
     }
 
-    private Property constructPropertyShape(String path, String node, String datatype, String minCount, String maxCount, List<String> enumerationList) {
+    private Property constructPropertyShape(String path, String node, String datatype, String minCount, String maxCount, String doc, List<String> aliases, List<String> enumerationList) {
         return Property.builder()
                 .path(extractNameFromIRI(path))
                 .node(extractNameFromIRI(node))
                 .dataType(extractNameFromIRI(datatype))
-                .minCount(minCount )
+                .minCount(minCount)
                 .maxCount(maxCount)
+                .doc(doc)
+                .aliases(aliases)
                 .in(enumerationList)
                 .build();
     }
