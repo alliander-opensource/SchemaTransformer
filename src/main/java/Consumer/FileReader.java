@@ -12,34 +12,35 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class FileReader {
-    private List<Path> paths;
-    private List<Model> rdfFiles;
+    private final List<Model> rdfFiles;
 
     public FileReader(String directoryPath) throws IOException {
-        listFilesForFolder(directoryPath);
-        listRDFFiles();
+        List<Path> paths = listFilesForFolder(directoryPath);
+        this.rdfFiles = listRDFFiles(paths);
     }
 
-    private void listFilesForFolder(String directoryPath) throws IOException {
+    private List<Path> listFilesForFolder(String directoryPath) throws IOException {
         Stream<Path> paths = Files.walk(Paths.get(directoryPath));
-        this.paths = paths.filter(Files::isRegularFile)
+        return paths.filter(Files::isRegularFile)
                     .collect(Collectors.toList());
     }
 
-    private void listRDFFiles() throws IOException {
-        this.rdfFiles = new ArrayList<>();
+    private List<Model> listRDFFiles(List<Path> paths) throws IOException {
+        List<Model> rdfFiles = new ArrayList<>();
 
         for(Path filePath: paths){
             InputStream input = new FileInputStream(String.valueOf(filePath));
             Optional<Model> model = getRDFFormatModel(input);
-            model.ifPresent(m -> this.rdfFiles.add(m));
+            model.ifPresent(rdfFiles::add);
         }
+        return rdfFiles;
     }
 
     private Optional<Model> getRDFFormatModel(InputStream input){
