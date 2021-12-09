@@ -4,14 +4,7 @@ import TBD.NodeShape;
 import TBD.Property;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
-import org.apache.avro.generic.GenericDatumReader;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.io.*;
-import org.apache.avro.reflect.ReflectData;
-import org.apache.avro.reflect.ReflectDatumWriter;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,44 +12,6 @@ import java.util.stream.Collectors;
 public class Avro {
 
     List<NodeShape> parents = new ArrayList<>();
-
-    public <T> GenericRecord pojoToRecord(T model) throws IOException {
-        Schema schema = ReflectData.get().getSchema(model.getClass());
-
-        ReflectDatumWriter<T> datumWriter = new ReflectDatumWriter<>(schema);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-        BinaryEncoder encoder = EncoderFactory.get().binaryEncoder(outputStream, null);
-        datumWriter.write(model, encoder);
-        encoder.flush();
-
-        DatumReader<GenericRecord> datumReader = new GenericDatumReader<>(schema);
-        BinaryDecoder decoder = DecoderFactory.get().binaryDecoder(outputStream.toByteArray(), null);
-
-        return datumReader.read(null, decoder);
-    }
-
-    public void buildSchema(NodeShape nodeShape) {
-        Schema schema = SchemaBuilder
-                .record("B")
-                .doc("This is a sub-class")
-                .aliases("Bb")
-                .fields()
-                .name("id").type().stringType().noDefault()
-                .name("abc").type().unionOf().nullType().and().array().items().type("string").endUnion().noDefault()
-                .name("bcd").type().array().items().type("double").noDefault()
-                .name("FromAtoC").type().enumeration("C").aliases("Cc").doc("This is a class with named elements").symbols("individual1", "individual2", "individual3").noDefault()
-                .name("FromBToD")
-                .doc("Association from B to D")
-                .type().unionOf().nullType().and().record("D").aliases("Dd").doc("This is yet another class").fields()
-                .name("id").type().stringType().noDefault()
-                .name("def").type().unionOf().nullType().and().intType().endUnion().noDefault().endRecord().endUnion().noDefault()
-                .name("FromBToDButSomehowDifferent")
-                .doc("No clue")
-                .type("D").noDefault()
-                .endRecord();
-        System.out.println("hello");
-    }
 
     public Schema buildBaseRecord(List<NodeShape> nodeShapeList) {
 
@@ -77,7 +32,6 @@ public class Avro {
 
         base = buildRecordFields(base, rootObject, nodeShapeList);
 
-        System.out.println("the end");
         return base;
     }
 
