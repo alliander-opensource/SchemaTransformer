@@ -4,6 +4,7 @@ import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFParseException;
 import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.UnsupportedRDFormatException;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -12,7 +13,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -49,7 +49,7 @@ public class FileReader {
         for (RDFFormat format: formatList) {
             try {
                 model = Optional.of(Rio.parse(input, "", format));
-            } catch (RDFParseException | IOException e) {
+            } catch (RDFParseException | UnsupportedRDFormatException | IOException e) {
                 // Not an RDF file, which is fine because we don't want those
             }
         }
