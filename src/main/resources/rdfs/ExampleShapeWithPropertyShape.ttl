@@ -28,7 +28,7 @@ shape:BShape
     a sh:NodeShape ;
     rdfs:comment "RootObject" ;
     sh:targetClass vocab:B ;
-    sh:property shape:idShape ;
+
     sh:property [
           sh:path vocab:FromBtoD ;
           sh:node shape:DShape ;
@@ -76,7 +76,7 @@ shape:DShape
 
 shape:EShape
     a sh:NodeShape ;
-    sh:TargetClass vocab:E ;
+    sh:targetClass vocab:E ;
     sh:property [
           sh:path vocab:fromEtoC ;
           sh:node shape:CShape ;

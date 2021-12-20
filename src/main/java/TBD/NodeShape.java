@@ -10,8 +10,9 @@ import java.util.List;
 public class NodeShape {
     private String nodeShapeID;
     private String targetClass;
-    private boolean rootObject;
     private String doc;
+    private String subClassOf;
+    private boolean rootObject;
     private List<String> aliases;
     private List<String> enumeration;
     private List<Property> propertyList;
