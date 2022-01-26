@@ -6,3 +6,4 @@ build
 
 # Ignore PyCharm project files
 .idea/
+!.idea/ktfmt.xml
