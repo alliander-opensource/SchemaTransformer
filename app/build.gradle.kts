@@ -32,9 +32,6 @@ dependencies {
     // Use the Kotlin test library.
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 
-    // Use the Kotlin JUnit integration.
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
-
     // https://mvnrepository.com/artifact/org.eclipse.rdf4j/rdf4j-model
     implementation("org.eclipse.rdf4j:rdf4j-model:3.7.2")
 
@@ -46,9 +43,18 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-nop
     implementation("org.slf4j:slf4j-nop:1.7.30")
+
+    // Kotest.
+    testImplementation("io.kotest:kotest-runner-junit5-jvm:5.1.0")
+    testImplementation("io.kotest:kotest-assertions-core-jvm:5.1.0")
+    // testImplementation("io.kotest:kotest-property-jvm:5.1.0")
 }
 
 application {
     // Define the main class for the application.
     mainClass.set("SchemaTransformer.AppKt")
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
