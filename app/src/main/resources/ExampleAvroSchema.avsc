@@ -1,0 +1,55 @@
+{
+    "type" : "record" ,
+    "name" : "B" ,
+    "doc" : "This is a sub-class"
+    "aliases": ["Bb"],
+    "fields" : [
+        {
+            "name" : "id",
+            "type" : string
+        },
+        {
+            "name" : "abc",
+            "type" :[
+                "null",
+                {
+                    "type" : "array",
+                    "items" : "string"
+                }
+            ]
+        },
+        {
+            "name" : "bcd",
+            "type" : "array" ,
+            "items" : "double"
+        },
+        {
+            "name" : "FromAtoC"
+            "type" : {
+                "name" : "C",
+                "aliases" ["Cc"], 
+                "doc" : "This is a class with named elements", 
+                "Symbols" : ["individual1","individual2", "individual3" ]
+            }
+        },
+        {
+            "name" : "FromBtoD" ,
+            "doc": "Association from B to D" ,
+            "type" : {
+                "name" : "D",
+                "aliases": ["Dd"],
+                "doc" : "This is yet another class", 
+                "fields" : [
+                    {
+                        "name" : "id",
+                        "type" : string
+                    },
+                    {
+                        "name" : "def",
+                        "type" : ["null", "int"] 
+                    }
+                ]
+            }
+        }
+    ]
+}
