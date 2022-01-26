@@ -9,17 +9,17 @@ import org.eclipse.rdf4j.rio.Rio
 import java.nio.file.Path
 import kotlin.io.path.reader
 
-
-private fun parseTtlFile(f: Path): Model = Rio.parse(f.reader(), "", RDFFormat.TURTLE)
-
-
-
-val jemoeder = Path("").toAbsolutePath().toString()
+// Test data.
 val ttlExample = Path("src/test/resources/rdfs/ExampleProfile.ttl")
 
+// Helper functions.
+private fun parseTtlFile(f: Path): Model = Rio.parse(f.reader(), "", RDFFormat.TURTLE)
+
 class ProfileReaderTest : FunSpec ({
-    println(jemoeder)
     test("Reading ttl file should return RDF model") {
-        listOf(parseTtlFile(ttlExample)) shouldBe ProfileReader.read(ttlExample)
+        val expected = listOf(parseTtlFile(ttlExample))
+        val actual = ProfileReader.read(ttlExample)
+
+        expected shouldBe actual
     }
 })
