@@ -16,7 +16,7 @@ object ProfileReader {
         val path = Path(inputPath)
         val files: Stream<Path> = if (recursive) Files.walk(path) else Files.walk(path, 1)
 
-        return files.filter { it.isRegularFile() }.map { parseFile(it) }.toList()
+        return files.filter { it.isRegularFile() }.map { parseFile(it) }.toList().filterNotNull()
     }
 
     private fun parseFile(filePath: ProfileFilePath): Model? {
