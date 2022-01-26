@@ -2,7 +2,6 @@ package schemaTransformer
 
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.*
 import java.util.stream.Stream
 import kotlin.io.path.*
 import kotlin.streams.toList
@@ -11,7 +10,6 @@ import org.eclipse.rdf4j.rio.Rio
 
 typealias ProfileFilePath = Path
 
-fun <T> Optional<T>.unwrap(): T? = orElse(null)
 
 object ProfileReader {
     fun read(inputPath: String, recursive: Boolean = true): List<Model?> {
