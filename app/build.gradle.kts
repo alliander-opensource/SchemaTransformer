@@ -8,7 +8,7 @@
 
 plugins {
     // Apply the org.jetbrains.kotlin.jvm Plugin to add support for Kotlin.
-    id("org.jetbrains.kotlin.jvm") version "1.5.31"
+    id("org.jetbrains.kotlin.jvm") version "1.6.10"
 
     // Apply the application plugin to add support for building a CLI application in Java.
     application
@@ -34,6 +34,15 @@ dependencies {
 
     // Use the Kotlin JUnit integration.
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+
+    // https://mvnrepository.com/artifact/org.eclipse.rdf4j/rdf4j-model
+    implementation("org.eclipse.rdf4j:rdf4j-model:3.7.2")
+
+    // https://mvnrepository.com/artifact/org.eclipse.rdf4j/rdf4j-rio-turtle
+    implementation("org.eclipse.rdf4j:rdf4j-rio-turtle:3.7.2")
+
+    // https://mvnrepository.com/artifact/org.eclipse.rdf4j/rdf4j-rio-rdfxml
+    implementation("org.eclipse.rdf4j:rdf4j-rio-rdfxml:3.7.2")
 }
 
 application {
