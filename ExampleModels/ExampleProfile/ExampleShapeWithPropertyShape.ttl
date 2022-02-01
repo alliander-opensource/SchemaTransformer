@@ -5,7 +5,7 @@
 @prefix vocab: <https://w3id.org/schematransform/ExampleVocabulary#> .
 @prefix shape: <https://w3id.org/schematransform/ExampleShape#> .
 @prefix : <https://w3id.org/schematransform/ExampleShape#> .
-
+@base: <https://w3id.org/schematransform/ExampleShape#> .
 
 shape:AShape 
     a sh:NodeShape ;
