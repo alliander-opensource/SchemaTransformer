@@ -1,4 +1,4 @@
-package schemaTransformer
+package schematransformer
 
 import java.util.Optional
 

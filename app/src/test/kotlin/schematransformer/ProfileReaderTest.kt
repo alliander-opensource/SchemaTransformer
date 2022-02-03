@@ -1,4 +1,6 @@
-package schemaTransformer
+package schematransformer
+
+import schematransformer.dxprofile.readDxProfile
 
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
@@ -18,7 +20,7 @@ private fun parseTtlFile(f: Path): Model = Rio.parse(f.reader(), "", RDFFormat.T
 class ProfileReaderTest : FunSpec ({
     test("Reading ttl file should return RDF model") {
         val expected = listOf(parseTtlFile(ttlExample))
-        val actual = ProfileReader.read(ttlExample)
+        val actual = readDxProfile(ttlExample)
 
         expected shouldBe actual
     }
