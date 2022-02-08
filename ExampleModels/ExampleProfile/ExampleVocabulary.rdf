@@ -26,7 +26,7 @@
 
     <owl:ObjectProperty rdf:about="https://w3id.org/schematransform/ExampleVocabulary#FromAToC">
         <rdfs:domain rdf:resource="https://w3id.org/schematransform/ExampleVocabulary#A"/>
-        <rdfs:range rdf:resource="https://w3id.org/schematransform/ExampleVocabulary#D"/>
+        <rdfs:range rdf:resource="https://w3id.org/schematransform/ExampleVocabulary#C"/>
         <rdfs:comment>Note: the spelling of this association doesn&apos;t seem to adhere to the convention here. In a profile that depends on multiple standards, there typically are multiple naming conventions. Any transformation to a schema should adopt the exact naming as it is provided by the standard.</rdfs:comment>
         <rdfs:label xml:lang="nl">VanANaarC</rdfs:label>
     </owl:ObjectProperty>
