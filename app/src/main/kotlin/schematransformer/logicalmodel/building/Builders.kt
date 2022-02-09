@@ -9,9 +9,8 @@ import schematransformer.logicalmodel.type
 
 private fun buildLogicalModels(rdfModels: List<Model>): List<LogicalModel>? {
     val modelsByType = rdfModels.groupBy { it.type }
-    val profiles = modelsByType[RdfType.Profile()] ?: return null
 
-    return profiles.map { buildLogicalModel(it, modelsByType) }
+    return modelsByType[RdfType.Profile()]?.map { buildLogicalModel(it, modelsByType) }
 }
 
 
