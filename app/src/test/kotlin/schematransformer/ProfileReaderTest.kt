@@ -3,24 +3,26 @@ package schematransformer
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import java.nio.file.Path
-import kotlin.io.path.Path
 import kotlin.io.path.reader
 import org.eclipse.rdf4j.model.Model
 import org.eclipse.rdf4j.rio.RDFFormat
 import org.eclipse.rdf4j.rio.Rio
-import schematransformer.dxprofile.readDxProfile
+
+import schematransformer.dxprofile.readProfile
+import java.io.File
 
 // Test data.
-val ttlExample = Path("src/test/resources/rdfs/ExampleProfile.ttl")
+val ttlExample = File("src/test/resources/rdfs/ExampleProfile.ttl")
 
 // Helper functions.
-private fun parseTtlFile(f: Path): Model = Rio.parse(f.reader(), "", RDFFormat.TURTLE)
+private fun parseRdfFile(f: File, format: RDFFormat = RDFFormat.TURTLE): Model =
+    Rio.parse(f.reader(), "", format)
 
 class ProfileReaderTest :
     FunSpec({
         test("Reading ttl file should return RDF model") {
-            val expected = listOf(parseTtlFile(ttlExample))
-            val actual = readDxProfile(ttlExample)
+            val expected = listOf(parseRdfFile(ttlExample))
+            val actual = readProfile(ttlExample)
 
             /* OWL Subject for first item has some randomness to it, so we check this one by hand for equality in their
             predicate and object. */
