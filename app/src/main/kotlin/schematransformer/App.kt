@@ -1,13 +1,7 @@
 package schematransformer
 
-import org.eclipse.rdf4j.model.Model
-import org.eclipse.rdf4j.rio.RDFFormat
-import org.eclipse.rdf4j.rio.Rio
-import schematransformer.dxprofile.LogicalModel
-import schematransformer.logicalmodel.reading.readRdfFiles
+import schematransformer.rdf.reading.readRdfFiles
 import java.io.File
-import kotlin.io.path.reader
-import kotlin.io.path.Path
 
 
 fun main() {

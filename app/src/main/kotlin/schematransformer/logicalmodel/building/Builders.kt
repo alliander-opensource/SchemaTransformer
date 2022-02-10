@@ -6,18 +6,22 @@ import schematransformer.logicalmodel.ProfileModel
 import schematransformer.logicalmodel.RdfType
 import schematransformer.logicalmodel.type
 
-
 private fun buildLogicalModels(rdfModels: List<Model>): List<LogicalModel>? {
     val modelsByType = rdfModels.groupBy { it.type }
 
     return modelsByType[RdfType.Profile()]?.map { buildLogicalModel(it, modelsByType) }
 }
 
-
-private fun buildLogicalModel(
+fun buildLogicalModel(
     profile: ProfileModel,
     associatedModelsByType: Map<RdfType, List<Model>>
 ): LogicalModel {
-    TODO()
-}
+    val associatedVocabularies = TODO()
+    val associatedConstraints = TODO()
 
+
+    return LogicalModel(
+        profile = profile,
+        vocabularies = associatedVocabularies,
+        constraints = associatedConstraints)
+}
