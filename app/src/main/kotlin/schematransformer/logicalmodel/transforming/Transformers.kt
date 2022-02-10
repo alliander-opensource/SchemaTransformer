@@ -1,4 +1,4 @@
-package schematransformer.logicalmodel
+package schematransformer.logicalmodel.transforming
 
 import schematransformer.logicalmodel.types.LogicalModel
 

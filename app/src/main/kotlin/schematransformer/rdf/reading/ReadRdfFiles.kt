@@ -5,6 +5,8 @@ import java.io.Reader
 import schematransformer.rdf.types.RdfFormat
 import schematransformer.rdf.types.RdfModel
 
+fun readRdfFiles(directory: String, recurse: Boolean = true): List<RdfModel> = readRdfFiles(File(directory), recurse)
+
 fun readRdfFiles(directory: File, recurse: Boolean = true): List<RdfModel> {
     val files = directory.walk()
     if (!recurse) files.maxDepth(1)
@@ -22,6 +24,8 @@ fun readRdfFiles(files: Sequence<File>): List<RdfModel> =
 
 private fun readRdfFiles(readersByFormat: Map<RdfFormat, List<Reader>>): List<RdfModel> =
     readersByFormat.flatMap { (format, readers) -> readers.map { readRdfFile(it, format) } }
+
+fun readRdfFile(file: String, format: RdfFormat): RdfModel = readRdfFile(File(file), format)
 
 fun readRdfFile(file: File, format: RdfFormat): RdfModel = readRdfFile(file.reader(), format)
 

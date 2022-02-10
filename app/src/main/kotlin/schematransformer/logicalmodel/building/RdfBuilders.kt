@@ -1,12 +1,12 @@
 package schematransformer.logicalmodel.building
 
-import org.eclipse.rdf4j.model.Model
-import schematransformer.logicalmodel.LogicalModel
-import schematransformer.logicalmodel.ProfileModel
-import schematransformer.logicalmodel.RdfType
-import schematransformer.logicalmodel.type
+import schematransformer.logicalmodel.types.LogicalModel
+import schematransformer.rdf.types.ProfileModel
+import schematransformer.rdf.types.RdfModel
+import schematransformer.rdf.types.RdfType
+import schematransformer.rdf.types.type
 
-private fun buildLogicalModels(rdfModels: List<Model>): List<LogicalModel>? {
+fun buildLogicalModels(rdfModels: List<RdfModel>): List<LogicalModel>? {
     val modelsByType = rdfModels.groupBy { it.type }
 
     return modelsByType[RdfType.Profile()]?.map { buildLogicalModel(it, modelsByType) }
@@ -14,7 +14,7 @@ private fun buildLogicalModels(rdfModels: List<Model>): List<LogicalModel>? {
 
 fun buildLogicalModel(
     profile: ProfileModel,
-    associatedModelsByType: Map<RdfType, List<Model>>
+    associatedModelsByType: Map<RdfType, List<RdfModel>>
 ): LogicalModel {
     val associatedVocabularies = TODO()
     val associatedConstraints = TODO()

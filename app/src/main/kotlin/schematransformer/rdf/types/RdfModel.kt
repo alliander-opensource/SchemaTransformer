@@ -10,9 +10,9 @@ typealias VocabularyModel = Model
 
 typealias ConstraintsModel = Model
 
-fun Model.isVocabulary(): Boolean = TODO()
+fun Model.isVocabulary(): Boolean = isProfile() or true
 
-fun Model.isConstraints(): Boolean = TODO()
+fun Model.isConstraints(): Boolean = isProfile() or true
 
 fun Model.isProfile(): Boolean =
     this.any {
@@ -22,8 +22,8 @@ fun Model.isProfile(): Boolean =
 val Model.type: RdfType
     get() =
         when {
-            isConstraints() -> RdfType.Constraints()
             isProfile() -> RdfType.Profile()
+            isConstraints() -> RdfType.Constraints()
             isVocabulary() -> RdfType.Vocabulary()
             else -> RdfType.Miscellaneous
         }
