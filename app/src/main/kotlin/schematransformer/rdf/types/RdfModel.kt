@@ -10,20 +10,24 @@ typealias VocabularyModel = Model
 
 typealias ConstraintsModel = Model
 
-fun Model.isVocabulary(): Boolean = isProfile() or true
+val Model.isVocabulary: Boolean
+    get() = isProfile or true
 
-fun Model.isConstraints(): Boolean = isProfile() or true
+val Model.isConstraints: Boolean
+    get() = isProfile or true
 
-fun Model.isProfile(): Boolean =
-    this.any {
-        it.predicate == RdfType.Profile().predicateIRI && it.`object` == RdfType.Profile().objectIRI
-    }
+val Model.isProfile: Boolean
+    get() =
+        this.any { statement ->
+            statement.predicate == RdfType.Profile().predicateIRI &&
+                statement.`object` == RdfType.Profile().objectIRI
+        }
 
 val Model.type: RdfType
     get() =
         when {
-            isProfile() -> RdfType.Profile()
-            isConstraints() -> RdfType.Constraints()
-            isVocabulary() -> RdfType.Vocabulary()
+            isProfile -> RdfType.Profile()
+            isConstraints -> RdfType.Constraints()
+            isVocabulary -> RdfType.Vocabulary()
             else -> RdfType.Miscellaneous
         }
