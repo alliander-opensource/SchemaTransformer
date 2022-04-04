@@ -16,7 +16,7 @@
 ###  https://w3id.org/schematransform/ExampleVocabulary#FromAToC
 vocab:FromAtoC rdf:type owl:ObjectProperty ;
                rdfs:domain vocab:A ;
-               rdfs:range vocab:D ;
+               rdfs:range vocab:C ;
                rdfs:label "VanANaarC"@nl .
 
 
