@@ -2,6 +2,7 @@ import Consumer.FileReader;
 import Consumer.RDFMap;
 import TBD.NodeShapeConstructor;
 import Transformers.Avro;
+import org.apache.avro.Schema;
 import org.apache.commons.cli.*;
 import org.eclipse.rdf4j.model.Model;
 
@@ -41,7 +42,9 @@ public class Main{
         NodeShapeConstructor nodeShapeConstructor = new NodeShapeConstructor(constraints, vocabularies);
         Avro avro = new Avro();
 
-        System.out.println(avro.buildBaseRecord(nodeShapeConstructor.getNodeShapeList()));
+        Schema result = avro.buildBaseRecord(nodeShapeConstructor.getNodeShapeList());
+        System.out.println(result);
+        avro.writeToAvro(avro.buildBaseRecord(nodeShapeConstructor.getNodeShapeList()));
 
 
     }

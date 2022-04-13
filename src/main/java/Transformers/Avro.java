@@ -5,6 +5,9 @@ import TBD.Property;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -180,5 +183,11 @@ public class Avro {
             }
         }
         return schema;
+    }
+
+    public void writeToAvro(Schema schema) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter("test.avsc"));
+        writer.write(schema.toString());
+        writer.close();
     }
 }
