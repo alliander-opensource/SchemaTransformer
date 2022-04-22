@@ -19,7 +19,7 @@ fun readRdfFiles(vararg files: File): List<RdfModel> = readRdfFiles(files.asSequ
 fun readRdfFiles(files: Sequence<File>): List<RdfModel> =
     readRdfFiles(
         files
-            .mapNotNull { file -> getRdfFormat(file.toString())?.let { it to file.reader() } }
+            .mapNotNull { file -> getRdfFormat(file.toString())?.let { it to file.bufferedReader() } }
             .groupBy({ it.first }, { it.second }))
 
 private fun readRdfFiles(readersByFormat: Map<RdfFormat, List<Reader>>): List<RdfModel> =
@@ -27,6 +27,6 @@ private fun readRdfFiles(readersByFormat: Map<RdfFormat, List<Reader>>): List<Rd
 
 fun readRdfFile(file: String, format: RdfFormat): RdfModel = readRdfFile(File(file), format)
 
-fun readRdfFile(file: File, format: RdfFormat): RdfModel = readRdfFile(file.reader(), format)
+fun readRdfFile(file: File, format: RdfFormat): RdfModel = readRdfFile(file.bufferedReader(), format)
 
 fun readRdfFile(reader: Reader, format: RdfFormat): RdfModel = readRdfFileWithRio(reader, format)

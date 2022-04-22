@@ -8,7 +8,6 @@ import org.eclipse.rdf4j.model.Model
 import org.eclipse.rdf4j.rio.RDFFormat
 import org.eclipse.rdf4j.rio.Rio
 
-import schematransformer.dxprofile.readProfile
 import java.io.File
 
 // Test data.
