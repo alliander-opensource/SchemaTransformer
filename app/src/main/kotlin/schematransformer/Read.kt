@@ -11,10 +11,9 @@ import org.eclipse.rdf4j.rio.UnsupportedRDFormatException
 import schematransformer.vocabulary.DXPROFILE
 
 val SUPPORTED_FILE_EXTENSIONS = listOf("ttl", "xml", "jsonld")
-const val CONTEXT_NAMESPACE_PREFIX = "iyrptc"
 
-fun generateContextFromFileName(file: File): IRI =
-    Values.iri("${CONTEXT_NAMESPACE_PREFIX}:${file.name}")
+fun generateContextFromFileName(nsPrefix: String = "", file: File): IRI =
+    Values.iri("${nsPrefix}:${file.name}")
 
 fun readFile(file: File, contextFn: (file: File) -> IRI): Model {
     val format =
