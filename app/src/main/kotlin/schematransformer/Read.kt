@@ -11,25 +11,31 @@ import org.eclipse.rdf4j.rio.UnsupportedRDFormatException
 import schematransformer.vocabulary.DXPROFILE
 
 val SUPPORTED_FILE_EXTENSIONS = listOf("ttl", "xml", "jsonld")
-val CONTEXT_NAMESPACE_PREFIX = "iyrptc"
+const val CONTEXT_NAMESPACE_PREFIX = "iyrptc"
 
-fun readFile(file: File): Model {
+fun generateContextFromFileName(file: File): IRI =
+    Values.iri("${CONTEXT_NAMESPACE_PREFIX}:${file.name}")
+
+fun readFile(file: File, contextFn: (file: File) -> IRI): Model {
     val format =
         Rio.getParserFormatForFileName(file.name).orElseThrow {
             UnsupportedRDFormatException("Unrecognized file format.")
         }
 
-    return Rio.parse(
-        file.reader(), "", format, Values.iri("${CONTEXT_NAMESPACE_PREFIX}:${file.name}"))
+    return Rio.parse(file.reader(), "", format, contextFn(file))
 }
 
-fun readDirectory(directory: File): Model {
+fun readDirectory(
+    directory: File,
+    contextFn: (file: File) -> IRI,
+    supportedFileExtensions: List<String> = SUPPORTED_FILE_EXTENSIONS
+): Model {
     val resultModel = TreeModel()
 
     for (file in directory.walk()) {
-        if (file.extension !in SUPPORTED_FILE_EXTENSIONS) continue
+        if (file.extension !in supportedFileExtensions) continue
 
-        val model = readFile(file)
+        val model = readFile(file, contextFn)
         resultModel.addAll(model)
     }
 
