@@ -1,13 +1,12 @@
 package schematransformer
 
-import schematransformer.read.generateContextFromFileName
-import schematransformer.read.readDirectory
+import org.eclipse.rdf4j.model.util.Values
 import java.io.File
-
-const val CONTEXT_NAMESPACE_PREFIX = "iyrptc"
+import schematransformer.read.readDirectory
 
 fun main() {
     val directory = File("app/src/test/resources/rdfs")
-    val m = readDirectory(directory, { generateContextFromFileName(CONTEXT_NAMESPACE_PREFIX, it) })
-    print(m)
+    val model = readDirectory(directory, contextFn = { path -> Values.iri("iyrtpc:${path.name}") })
+
+
 }
