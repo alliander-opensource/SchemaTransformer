@@ -1,4 +1,4 @@
-package schematransformer.rdf.types
+package old.logicalmodel.rdf.types
 
 import org.eclipse.rdf4j.model.Model
 

@@ -1,9 +1,9 @@
-package schematransformer.rdf.reading
+package old.logicalmodel.rdf.reading
 
 import org.eclipse.rdf4j.model.Model
 import org.eclipse.rdf4j.rio.RDFFormat
 import org.eclipse.rdf4j.rio.Rio
-import schematransformer.util.unwrap
+import old.logicalmodel.util.unwrap
 import java.io.Reader
 
 fun readRdfFileWithRio(reader: Reader, format: RDFFormat): Model = Rio.parse(reader, "", format)

@@ -1,10 +1,10 @@
-package schematransformer.logicalmodel.building
+package old.logicalmodel.building
 
-import schematransformer.logicalmodel.types.LogicalModel
-import schematransformer.rdf.types.ProfileModel
-import schematransformer.rdf.types.RdfModel
-import schematransformer.rdf.types.RdfType
-import schematransformer.rdf.types.type
+import old.logicalmodel.types.LogicalModel
+import old.logicalmodel.rdf.types.ProfileModel
+import old.logicalmodel.rdf.types.RdfModel
+import old.logicalmodel.rdf.types.RdfType
+import old.logicalmodel.rdf.types.type
 
 fun buildLogicalModels(rdfModels: List<RdfModel>): List<LogicalModel>? {
     val modelsByType = rdfModels.groupBy { it.type }

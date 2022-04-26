@@ -1,9 +1,9 @@
-package schematransformer.rdf.reading
+package old.logicalmodel.rdf.reading
 
 import java.io.File
 import java.io.Reader
-import schematransformer.rdf.types.RdfFormat
-import schematransformer.rdf.types.RdfModel
+import old.logicalmodel.rdf.types.RdfFormat
+import old.logicalmodel.rdf.types.RdfModel
 
 fun readRdfFiles(directory: String, recurse: Boolean = true): List<RdfModel> = readRdfFiles(File(directory), recurse)
 
