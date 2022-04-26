@@ -33,13 +33,19 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 
     // https://mvnrepository.com/artifact/org.eclipse.rdf4j/rdf4j-model
-    implementation("org.eclipse.rdf4j:rdf4j-model:3.7.2")
+    implementation("org.eclipse.rdf4j:rdf4j-model:4.0.0")
 
     // https://mvnrepository.com/artifact/org.eclipse.rdf4j/rdf4j-rio-turtle
-    implementation("org.eclipse.rdf4j:rdf4j-rio-turtle:3.7.2")
+    implementation("org.eclipse.rdf4j:rdf4j-rio-turtle:4.0.0")
+    implementation("org.eclipse.rdf4j:rdf4j-repository-sparql:4.0.0")
+
+    implementation("org.eclipse.rdf4j:rdf4j-sail:4.0.0")
 
     // https://mvnrepository.com/artifact/org.eclipse.rdf4j/rdf4j-rio-rdfxml
-    implementation("org.eclipse.rdf4j:rdf4j-rio-rdfxml:3.7.2")
+    implementation("org.eclipse.rdf4j:rdf4j-rio-rdfxml:4.0.0")
+    implementation("org.eclipse.rdf4j:rdf4j-repository-sail:4.0.0")
+    implementation("org.eclipse.rdf4j:rdf4j-sail-memory:4.0.0")
+    implementation("org.eclipse.rdf4j:rdf4j-sparqlbuilder:4.0.0")
 
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-nop
     implementation("org.slf4j:slf4j-nop:1.7.30")
