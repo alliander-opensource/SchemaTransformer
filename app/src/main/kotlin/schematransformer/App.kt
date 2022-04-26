@@ -1,5 +1,7 @@
 package schematransformer
 
+import schematransformer.read.generateContextFromFileName
+import schematransformer.read.readDirectory
 import java.io.File
 
 const val CONTEXT_NAMESPACE_PREFIX = "iyrptc"
