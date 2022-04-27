@@ -7,16 +7,9 @@ import org.eclipse.rdf4j.model.Statement
 import org.eclipse.rdf4j.model.vocabulary.RDF
 import schematransformer.vocabulary.DXPROFILE
 
-
-//fun Model.
-
 fun Model.getProfileIRIs(): Set<Resource> = this.filter(null, RDF.TYPE, DXPROFILE.PROFILE).subjects()
-fun Model.getResourceStatementss(profileIri: IRI): List<Statement> {
-    val resourceIRIs = this.filter(null, DXPROFILE.HASRESOURCE, null).objects()
-    return this.filter { it.subject in resourceIRIs }
-}
 fun Model.getResourceStatements(profileIri: IRI): List<Statement> =
-    this.filter { it.subject in this.filter(null, DXPROFILE.HASRESOURCE, null).objects() }
+    this.filter { it.subject in this.filter(profileIri, DXPROFILE.HASRESOURCE, null).objects() }
 
 
 //fun assignSchemaNamedGraphs(model: Model): Any {
