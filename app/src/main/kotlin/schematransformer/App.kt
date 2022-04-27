@@ -7,10 +7,10 @@ import schematransformer.read.readDirectory
 
 fun main() {
     val directory = File("app/src/test/resources/rdfs")
-    val model = readDirectory(directory, contextFn = { path -> Values.iri("file://${path.absolutePath}") })
+    val model = readDirectory(directory)
 
     println(model)
-    val p = model.getProfileIRIs().first()
+    val p = model.getProfileIRIs().first()  // We support only one profile per directory.
     val rs = model.getResourceStatements(p as IRI)
     println(rs)
 

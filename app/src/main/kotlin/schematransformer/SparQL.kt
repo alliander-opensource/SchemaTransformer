@@ -22,7 +22,7 @@ fun testSparqlBuilder(): SelectQuery {
 
 fun main() {
     val directory = File("app/src/test/resources/rdfs")
-    val m = readDirectory(directory, contextFn = { path -> Values.iri("iyrtpc:${path.name}") })
+    val m = readDirectory(directory)
 
     // Via SparQLBuilder.
     val q = testSparqlBuilder().queryString
