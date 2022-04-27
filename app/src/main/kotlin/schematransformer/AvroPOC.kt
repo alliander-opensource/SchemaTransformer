@@ -1,17 +1,24 @@
 package schematransformer
 
-import com.github.avrokotlin.avro4k.Avro
-import kotlinx.serialization.Serializable
-
-
-@Serializable
-data class Ingredient(val name: String, val sugar: Double, val fat: Double)
-
-@Serializable
-data class Pizza(val name: String, val ingredients: List<Ingredient>, val vegetarian: Boolean, val kcals: Int)
-
+import org.apache.avro.SchemaBuilder
 
 fun main() {
-    val schema = Avro.default.schema(Pizza.serializer())
-    println(schema.toString(true))
+    val D = SchemaBuilder.record("D")
+        .doc("This is yet another class")
+        .aliases("Dd")
+        .fields()
+        .name("id").type().stringType().noDefault()
+        .name("def").type().unionOf().nullType().and().intType().endUnion().noDefault()
+        .endRecord()
+    val FromBtoDType = SchemaBuilder.unionOf().nullType().and().type(D).endUnion()
+
+    val B = SchemaBuilder.record("B")
+        .doc("This is a sub-class")
+        .aliases("Bb")
+        .fields()
+        .name("FromBtoD").type(FromBtoDType).noDefault()
+        .name("FromBtoDButSomehowDifferent").type(D).noDefault()
+        .endRecord()
+
+    println(B)
 }

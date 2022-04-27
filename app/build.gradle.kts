@@ -42,6 +42,7 @@ dependencies {
     implementation("org.eclipse.rdf4j:rdf4j-repository-sparql:4.0.0")
 
     implementation("org.eclipse.rdf4j:rdf4j-sail:4.0.0")
+    implementation("org.apache.avro:avro:1.11.0")
 
     // https://mvnrepository.com/artifact/org.eclipse.rdf4j/rdf4j-rio-rdfxml
     implementation("org.eclipse.rdf4j:rdf4j-rio-rdfxml:4.0.0")

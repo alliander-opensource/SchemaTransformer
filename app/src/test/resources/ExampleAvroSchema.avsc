@@ -1,7 +1,7 @@
 {
-    "type" : "record" ,
+    "type" : "record",
     "name" : "B" ,
-    "doc" : "This is a sub-class"
+    "doc" : "This is a sub-class",
     "aliases": ["Bb"],
     "fields" : [
         {
@@ -24,10 +24,10 @@
             "items" : "double"
         },
         {
-            "name" : "FromAtoC"
+            "name" : "FromAtoC",
             "type" : {
-                "name" : "C",
-                "aliases" ["Cc"], 
+                "name": "C",
+                "aliases": ["Cc"],
                 "doc" : "This is a class with named elements", 
                 "Symbols" : ["individual1","individual2", "individual3" ]
             }
