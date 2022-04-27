@@ -1,7 +1,6 @@
 package schematransformer
 
 import org.eclipse.rdf4j.model.IRI
-import org.eclipse.rdf4j.model.util.Values
 import java.io.File
 import schematransformer.read.readDirectory
 
@@ -10,8 +9,8 @@ fun main() {
     val model = readDirectory(directory)
 
     println(model)
-    val p = model.getProfileIRIs().first()  // We support only one profile per directory.
-    val rs = model.getResourceStatements(p as IRI)
-    println(rs)
+    val profileIri = model.getProfileIRIs().first() as IRI  // We support only one profile per directory.
+    val resourceStatements = model.getResourceStatements(profileIri)
+    println(resourceStatements)
 
 }

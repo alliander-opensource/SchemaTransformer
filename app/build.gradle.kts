@@ -46,6 +46,7 @@ dependencies {
     implementation("org.eclipse.rdf4j:rdf4j-repository-sail:4.0.0")
     implementation("org.eclipse.rdf4j:rdf4j-sail-memory:4.0.0")
     implementation("org.eclipse.rdf4j:rdf4j-sparqlbuilder:4.0.0")
+    implementation("com.github.avro-kotlin.avro4k:avro4k-core:1.6.0")
 
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-nop
     implementation("org.slf4j:slf4j-nop:1.7.30")
