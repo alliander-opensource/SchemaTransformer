@@ -7,7 +7,6 @@ import org.eclipse.rdf4j.model.Model
 
 
 fun buildSchema(model: Model, rootNodeShape: IRI): Schema {
-
     TODO()
 }
 
