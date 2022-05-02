@@ -4,6 +4,11 @@ import org.apache.avro.Schema
 import org.apache.avro.SchemaBuilder
 import org.eclipse.rdf4j.model.IRI
 import org.eclipse.rdf4j.model.Model
+import org.eclipse.rdf4j.model.vocabulary.RDF
+import org.eclipse.rdf4j.model.vocabulary.RDFS
+import org.eclipse.rdf4j.model.vocabulary.SHACL
+import schematransformer.read.readDirectory
+import java.io.File
 
 
 fun buildSchema(model: Model, rootNodeShape: IRI): Schema {
@@ -35,4 +40,23 @@ fun main() {
     // Kan blijkbaar niet met de builder? Rick doet het achteraf met een map.
 
     println(B)
+
+    val m = readDirectory(File("app/src/test/resources/rdfs/"))
+    val nodeShapeIRIs = m.filter(null, RDF.TYPE, SHACL.NODE_SHAPE).subjects()
+
+    for (nodeShapeIRI in nodeShapeIRIs) {
+        if (!nodeShapeIRI.toString().endsWith("DShape")) continue  // Let's build just the D shape for now.
+
+        val targetClassIRI = m.filter(nodeShapeIRI, SHACL.TARGET_CLASS, null).objects().first()  // Assume it's one.
+        val targetClass = when (targetClassIRI) {
+            is IRI -> targetClassIRI.localName
+            else -> throw IllegalStateException()
+        }
+        val aliases = m.filter(targetClassIRI, RDFS.COMMENT, null).objects().first()
+        val doc = m.filter(targetClassIRI, RDFS.LABEL, null).objects().first()
+
+        val propertyIRIs = m.filter(nodeShapeIRI, SHACL.PROPERTY, null).objects()
+        println(propertyIRIs)
+
+    }
 }
