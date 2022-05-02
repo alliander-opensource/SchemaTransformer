@@ -1,7 +1,7 @@
 package schematransformer.read
 
-import java.io.File
 import org.eclipse.rdf4j.model.IRI
+import java.io.File
 import org.eclipse.rdf4j.model.Model
 import org.eclipse.rdf4j.model.impl.TreeModel
 import org.eclipse.rdf4j.model.util.Values
@@ -15,7 +15,7 @@ fun readFile(file: File): Model {
         Rio.getParserFormatForFileName(file.name).orElseThrow {
             UnsupportedRDFormatException("Unrecognized file format.")
         }
-    val fileIRI = Values.iri("file://${file.absolutePath}")
+    val fileIRI = Values.iri(file.toURI().toString())
 
     return Rio.parse(file.reader(), "", format, fileIRI)
 }
