@@ -57,8 +57,8 @@ fun main() {
     val rootObjectIRI =
         m.first { it.predicate == RDFS.COMMENT && it.`object` == Values.literal("RootObject") }.subject as IRI
     val propertyIRI = Values.iri("https://w3id.org/schematransform/ExampleShape#idShape")
-//    val q = ShaclQuery.fetchNodeShape(rootObjectIRI)
-    val q = ShaclQuery.fetchPropertyShape(propertyIRI)
+    val q = ShaclQuery.fetchNodeShape(rootObjectIRI)
+//    val q = ShaclQuery.fetchPropertyShape(propertyIRI)
 
     // Via raw string.
 //    val q = "SELECT ?x ?y WHERE {?x rdf:type ?y}"
@@ -70,10 +70,15 @@ fun main() {
 
             val preparedQuery = conn.prepareTupleQuery(q)
 
-            val result = preparedQuery.evaluate()
-                .map { res -> res.associateBy({ it.name }, { it.value }) }
+//            val nodeShapeB = preparedQuery.evaluate()
+//                .map { res -> res.associateBy({ it.name }, { it.value }) }
 
-            println(result)
+            val nodeShapeB = preparedQuery.evaluate()
+                .flatten()
+                .groupBy({ it.name }, { it.value })
+                .mapValues { it.value.distinct() }
+
+            println(nodeShapeB)
 
         }
     } finally {
