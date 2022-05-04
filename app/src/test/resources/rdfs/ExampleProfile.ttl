@@ -56,7 +56,7 @@ prof:ResourceDescriptor rdf:type owl:Class .
 :ConstraintsResource rdf:type owl:NamedIndividual ,
                               prof:ResourceDescriptor ;
                      dct:Format <https://www.w3.org/TR/turtle/> ;
-                     prof:hasArtifact <https://w3id.org/schematransform/ExampleShape#> ;
+                     prof:hasArtifact "./ExampleShapeWithPropertyShape.ttl" ;
                      prof:hasRole role:constraints .
 
 
@@ -71,7 +71,7 @@ prof:ResourceDescriptor rdf:type owl:Class .
 :VocabularyResource rdf:type owl:NamedIndividual ,
                              prof:ResourceDescriptor ;
                     dct:Format <https://www.w3.org/TR/turtle/> ;
-                    prof:hasArtifact <https://w3id.org/schematransform/ExampleVocabulary#> ;
+                    prof:hasArtifact "./ExampleVocabulary.ttl" ;
                     prof:hasRole role:vocabulary .
 
 
