@@ -69,11 +69,10 @@ fun main() {
             conn.add(m) // TODO: Can be done directly from file with syntax similar to `parse`.
 
             val preparedQuery = conn.prepareTupleQuery(q)
-            val result = preparedQuery.evaluate()
 
-            for (st in result) {
-                println(st)
-            }
+            val result = preparedQuery.evaluate()
+                .map { res -> res.associateBy({ it.name }, { it.value }) }
+
             println(result)
 
         }
