@@ -3,18 +3,27 @@ package schematransformer.transformer
 import org.eclipse.rdf4j.model.IRI
 import org.eclipse.rdf4j.model.util.Values
 import org.eclipse.rdf4j.model.vocabulary.RDFS
+import org.eclipse.rdf4j.model.vocabulary.SHACL
+import org.eclipse.rdf4j.model.vocabulary.SKOS
 import org.eclipse.rdf4j.repository.sail.SailRepository
 import org.eclipse.rdf4j.sail.memory.MemoryStore
 import schematransformer.read.readDirectory
 import java.io.File
 
+
 object ShaclQuery {
+    private fun prefixes(vararg vocab: Any): String = vocab.joinToString("\n") {  // TODO: Beautify. Also the mixed indent in the output.
+        with(it.javaClass.declaredFields) {
+            "PREFIX ${this.first { f -> f.name == "PREFIX" }.get(String)}: <${
+                this.first { f -> f.name == "NAMESPACE" }.get(String)
+            }>"
+        }
+    }
+
     fun fetchNodeShape(nodeShape: IRI) = """
-        PREFIX prof: <http://www.w3.org/ns/dx/prof/>
-        PREFIX sh: <http://www.w3.org/ns/shacl#>
-        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        ${prefixes(SHACL(), SKOS())}
         
-        SELECT ?otherShape ?targetClass ?label ?comment ?property ?path
+        SELECT ?targetClass ?label ?comment ?property ?path
         WHERE {
             <$nodeShape> sh:targetClass ?targetClass .
             
@@ -27,9 +36,7 @@ object ShaclQuery {
         }""".trimIndent()
 
     fun fetchPropertyShape(propertyShape: IRI) = """
-        PREFIX prof: <http://www.w3.org/ns/dx/prof/>
-        PREFIX sh: <http://www.w3.org/ns/shacl#>
-        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        ${prefixes(SHACL(), SKOS())}
         
         SELECT ?path ?label ?rangeType ?comment ?minCount ?maxCount
         WHERE {
@@ -57,8 +64,9 @@ fun main() {
     val rootObjectIRI =
         m.first { it.predicate == RDFS.COMMENT && it.`object` == Values.literal("RootObject") }.subject as IRI
     val propertyIRI = Values.iri("https://w3id.org/schematransform/ExampleShape#idShape")
-    val q = ShaclQuery.fetchNodeShape(rootObjectIRI)
-//    val q = ShaclQuery.fetchPropertyShape(propertyIRI)
+//    val q = ShaclQuery.fetchNodeShape(rootObjectIRI)
+    val q = ShaclQuery.fetchPropertyShape(propertyIRI)
+    print(q)
 
     // Via raw string.
 //    val q = "SELECT ?x ?y WHERE {?x rdf:type ?y}"
