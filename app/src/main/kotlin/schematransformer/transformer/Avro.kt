@@ -33,7 +33,7 @@ object ShaclQuery {
             }
         }
 
-    fun fetchNodeShape(nodeShape: IRI) = """
+    fun fetchNodeShape(nodeShape: IRI): String = """
         ${prefixes(SHACL(), SKOS())}
         
         SELECT ?targetClass ?label ?comment ?property ?path
@@ -48,7 +48,7 @@ object ShaclQuery {
                          rdfs:comment|skos:definition ?comment .
         }""".trimIndent()
 
-    fun fetchPropertyShape(propertyShape: IRI) = """
+    fun fetchPropertyShape(propertyShape: IRI): String = """
         ${prefixes(SHACL(), SKOS())}
         
         SELECT ?path ?label ?rangeType ?comment ?minCount ?maxCount
@@ -63,31 +63,44 @@ object ShaclQuery {
              }
         }
     """.trimIndent()
+
+    fun fetchRootObject(context: IRI): String = """
+        ${prefixes(SHACL())}
+        
+        SELECT ?root
+        FROM <$context>
+        WHERE {
+            ?root a sh:NodeShape ;
+                  rdfs:comment "RootObject" .
+        }""".trimIndent()
 }
 
 fun getFileIRI(base: File, relativeURL: String): IRI =
     Values.iri(File(base, relativeURL).normalize().toURI().toString())
 
-fun buildSchema(conn: SailRepositoryConnection, constraintsURL: IRI, vocabularyURLs: List<IRI>): Any {
-    println("constraints: $constraintsURL")
-    println("vocabs: $vocabularyURLs")
+fun buildSchema(conn: SailRepositoryConnection, constraintsNamedGraph: IRI, vocabularyNamedGraphs: List<IRI>): String? {
+    println("constraints: $constraintsNamedGraph")
+    println("vocabs: $vocabularyNamedGraphs")
 
-    return 1
+    val rootObject =
+        conn.prepareTupleQuery(ShaclQuery.fetchRootObject(constraintsNamedGraph)).evaluate()
+            .flatten()
+            .firstOrNull()
+            ?: return null
+
+    println(rootObject)
+    return ""
 }
 
-fun buildSchemas(conn: SailRepositoryConnection, model: RdfModel) {
+fun buildSchemas(conn: SailRepositoryConnection, directory: File) {
     val resources = conn.prepareTupleQuery(getProfileResources()).evaluate()
     val artifactsByRole = resources
         .groupBy({ it.getValue("role") }, { it.getValue("artifact") })
 
     for (constraints in artifactsByRole[DXPROFILE.ROLE.CONSTRAINTS] ?: listOf()) {
-        val constraintsFileURL = getFileIRI(model.path, constraints.stringValue())
+        val constraintsFileURL = getFileIRI(directory, constraints.stringValue())
         val vocabularyFileURLs =
-            artifactsByRole[DXPROFILE.ROLE.VOCABULARY]?.map { getFileIRI(model.path, it.stringValue()) } ?: listOf()
-
-        val rootObject = model.findRootObject(context = constraintsFileURL)
-        println(rootObject)
-
+            artifactsByRole[DXPROFILE.ROLE.VOCABULARY]?.map { getFileIRI(directory, it.stringValue()) } ?: listOf()
 
         buildSchema(conn, constraintsFileURL, vocabularyFileURLs)
     }
@@ -111,7 +124,7 @@ fun main() {
         db.connection.use { conn ->
             conn.add(model.data) // TODO: Can be done directly from file with syntax similar to `parse`.
 
-            buildSchemas(conn, model)
+            buildSchemas(conn, model.path)
 
 
 //            val preparedQuery = conn.prepareTupleQuery(q)
