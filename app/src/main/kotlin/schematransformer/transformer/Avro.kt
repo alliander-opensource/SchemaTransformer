@@ -1,6 +1,8 @@
 package schematransformer.transformer
 
+import arrow.core.computations.result
 import org.eclipse.rdf4j.model.IRI
+import org.eclipse.rdf4j.model.Model
 import org.eclipse.rdf4j.model.util.Values
 import org.eclipse.rdf4j.model.vocabulary.RDFS
 import org.eclipse.rdf4j.model.vocabulary.SHACL
@@ -8,17 +10,23 @@ import org.eclipse.rdf4j.model.vocabulary.SKOS
 import org.eclipse.rdf4j.repository.sail.SailRepository
 import org.eclipse.rdf4j.sail.memory.MemoryStore
 import schematransformer.read.readDirectory
+import schematransformer.toMap
 import java.io.File
 
 
+fun Model.findRootObject(): IRI =
+    this.first { it.predicate == RDFS.COMMENT && it.`object` == Values.literal("RootObject") }.subject as IRI
+
+
 object ShaclQuery {
-    private fun prefixes(vararg vocab: Any): String = vocab.joinToString("\n") {  // TODO: Beautify. Also the mixed indent in the output.
-        with(it.javaClass.declaredFields) {
-            "PREFIX ${this.first { f -> f.name == "PREFIX" }.get(String)}: <${
-                this.first { f -> f.name == "NAMESPACE" }.get(String)
-            }>"
+    private fun prefixes(vararg vocab: Any): String =
+        vocab.joinToString("\n") {  // TODO: Beautify. Also the mixed indent in the output.
+            with(it.javaClass.declaredFields) {
+                "PREFIX ${this.first { f -> f.name == "PREFIX" }.get(String)}: <${
+                    this.first { f -> f.name == "NAMESPACE" }.get(String)
+                }>"
+            }
         }
-    }
 
     fun fetchNodeShape(nodeShape: IRI) = """
         ${prefixes(SHACL(), SKOS())}
@@ -61,12 +69,11 @@ fun main() {
 
     // Via SparQLBuilder.
 //    val q = testSparqlBuilder().queryString
-    val rootObjectIRI =
-        m.first { it.predicate == RDFS.COMMENT && it.`object` == Values.literal("RootObject") }.subject as IRI
-    val propertyIRI = Values.iri("https://w3id.org/schematransform/ExampleShape#idShape")
-//    val q = ShaclQuery.fetchNodeShape(rootObjectIRI)
-    val q = ShaclQuery.fetchPropertyShape(propertyIRI)
-    print(q)
+    val property = Values.iri("https://w3id.org/schematransform/ExampleShape#idShape")
+    val rootObject = m.findRootObject()
+    val q = ShaclQuery.fetchNodeShape(rootObject)
+//    val q = ShaclQuery.fetchPropertyShape(property)
+//    print(q)
 
     // Via raw string.
 //    val q = "SELECT ?x ?y WHERE {?x rdf:type ?y}"
@@ -77,16 +84,17 @@ fun main() {
             conn.add(m) // TODO: Can be done directly from file with syntax similar to `parse`.
 
             val preparedQuery = conn.prepareTupleQuery(q)
+            val result = preparedQuery.evaluate()
 
 //            val nodeShapeB = preparedQuery.evaluate()
 //                .map { res -> res.associateBy({ it.name }, { it.value }) }
 
-            val nodeShapeB = preparedQuery.evaluate()
-                .flatten()
-                .groupBy({ it.name }, { it.value })
-                .mapValues { it.value.distinct() }
+//            val nodeShapeB = preparedQuery.evaluate()
+//                .flatten()
+//                .groupBy({ it.name }, { it.value })
+//                .mapValues { it.value.distinct() }
 
-            println(nodeShapeB)
+            println(result.toMap())
 
         }
     } finally {

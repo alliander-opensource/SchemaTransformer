@@ -1,6 +1,5 @@
 package schematransformer.read
 
-import org.eclipse.rdf4j.model.IRI
 import java.io.File
 import org.eclipse.rdf4j.model.Model
 import org.eclipse.rdf4j.model.impl.TreeModel
