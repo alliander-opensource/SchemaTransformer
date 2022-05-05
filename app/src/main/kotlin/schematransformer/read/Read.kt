@@ -6,6 +6,7 @@ import org.eclipse.rdf4j.model.impl.TreeModel
 import org.eclipse.rdf4j.model.util.Values
 import org.eclipse.rdf4j.rio.Rio
 import org.eclipse.rdf4j.rio.UnsupportedRDFormatException
+import schematransformer.RdfModel
 
 val SUPPORTED_FILE_EXTENSIONS = listOf("ttl", "xml", "jsonld")
 
@@ -19,7 +20,7 @@ fun readFile(file: File): Model {
     return Rio.parse(file.reader(), "", format, fileIRI)
 }
 
-fun readDirectory(directory: File, supportedFileExtensions: List<String> = SUPPORTED_FILE_EXTENSIONS): Model {
+fun readDirectory(directory: File, supportedFileExtensions: List<String> = SUPPORTED_FILE_EXTENSIONS): RdfModel {
     val resultModel = TreeModel()
 
     for (file in directory.walk()) {
@@ -29,5 +30,5 @@ fun readDirectory(directory: File, supportedFileExtensions: List<String> = SUPPO
         resultModel.addAll(model)
     }
 
-    return resultModel
+    return RdfModel(path = directory.absoluteFile, data = resultModel)
 }

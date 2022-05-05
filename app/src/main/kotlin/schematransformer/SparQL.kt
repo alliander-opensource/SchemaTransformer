@@ -39,7 +39,7 @@ fun main() {
     val db = SailRepository(MemoryStore())
     try {
         db.connection.use { conn ->
-            conn.add(m) // TODO: Can be done directly from file with syntax similar to `parse`.
+            conn.add(m.data) // TODO: Can be done directly from file with syntax similar to `parse`.
 
             val preparedQuery = conn.prepareTupleQuery(q)
             val result = preparedQuery.evaluate()

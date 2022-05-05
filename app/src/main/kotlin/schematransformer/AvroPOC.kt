@@ -42,20 +42,20 @@ fun main() {
     println(B)
 
     val m = readDirectory(File("app/src/test/resources/rdfs/"))
-    val nodeShapeIRIs = m.filter(null, RDF.TYPE, SHACL.NODE_SHAPE).subjects()
+    val nodeShapeIRIs = m.data.filter(null, RDF.TYPE, SHACL.NODE_SHAPE).subjects()
 
     for (nodeShapeIRI in nodeShapeIRIs) {
         if (!nodeShapeIRI.toString().endsWith("DShape")) continue  // Let's build just the D shape for now.
 
-        val targetClassIRI = m.filter(nodeShapeIRI, SHACL.TARGET_CLASS, null).objects().first()  // Assume it's one.
+        val targetClassIRI = m.data.filter(nodeShapeIRI, SHACL.TARGET_CLASS, null).objects().first()  // Assume it's one.
         val targetClass = when (targetClassIRI) {
             is IRI -> targetClassIRI.localName
             else -> throw IllegalStateException()
         }
-        val aliases = m.filter(targetClassIRI, RDFS.COMMENT, null).objects().first()
-        val doc = m.filter(targetClassIRI, RDFS.LABEL, null).objects().first()
+        val aliases = m.data.filter(targetClassIRI, RDFS.COMMENT, null).objects().first()
+        val doc = m.data.filter(targetClassIRI, RDFS.LABEL, null).objects().first()
 
-        val propertyIRIs = m.filter(nodeShapeIRI, SHACL.PROPERTY, null).objects()
+        val propertyIRIs = m.data.filter(nodeShapeIRI, SHACL.PROPERTY, null).objects()
         println(propertyIRIs)
 
     }

@@ -1,23 +1,26 @@
 package schematransformer.transformer
 
-import arrow.core.computations.result
 import org.eclipse.rdf4j.model.IRI
-import org.eclipse.rdf4j.model.Model
 import org.eclipse.rdf4j.model.util.Values
 import org.eclipse.rdf4j.model.vocabulary.RDFS
 import org.eclipse.rdf4j.model.vocabulary.SHACL
 import org.eclipse.rdf4j.model.vocabulary.SKOS
 import org.eclipse.rdf4j.repository.sail.SailRepository
+import org.eclipse.rdf4j.repository.sail.SailRepositoryConnection
 import org.eclipse.rdf4j.sail.memory.MemoryStore
+import schematransformer.RdfModel
 import schematransformer.getProfileResources
 import schematransformer.read.readDirectory
-import schematransformer.toMap
 import schematransformer.vocabulary.DXPROFILE
 import java.io.File
 
 
-fun Model.findRootObject(): IRI =
-    this.first { it.predicate == RDFS.COMMENT && it.`object` == Values.literal("RootObject") }.subject as IRI
+fun RdfModel.findRootObject(context: IRI): IRI? {
+    val matches = this.data.filter(null, RDFS.COMMENT, Values.literal("RootObject"), context)
+
+    return if (matches.isNotEmpty()) matches.first().subject as IRI
+    else null
+}
 
 
 object ShaclQuery {
@@ -62,6 +65,35 @@ object ShaclQuery {
     """.trimIndent()
 }
 
+fun getFileIRI(base: File, relativeURL: String): IRI =
+    Values.iri(File(base, relativeURL).normalize().toURI().toString())
+
+fun buildSchema(conn: SailRepositoryConnection, constraintsURL: IRI, vocabularyURLs: List<IRI>): Any {
+    println("constraints: $constraintsURL")
+    println("vocabs: $vocabularyURLs")
+
+    return 1
+}
+
+fun buildSchemas(conn: SailRepositoryConnection, model: RdfModel) {
+    val resources = conn.prepareTupleQuery(getProfileResources()).evaluate()
+    val artifactsByRole = resources
+        .groupBy({ it.getValue("role") }, { it.getValue("artifact") })
+
+    for (constraints in artifactsByRole[DXPROFILE.ROLE.CONSTRAINTS] ?: listOf()) {
+        val constraintsFileURL = getFileIRI(model.path, constraints.stringValue())
+        val vocabularyFileURLs =
+            artifactsByRole[DXPROFILE.ROLE.VOCABULARY]?.map { getFileIRI(model.path, it.stringValue()) } ?: listOf()
+
+        val rootObject = model.findRootObject(context = constraintsFileURL)
+        println(rootObject)
+
+
+        buildSchema(conn, constraintsFileURL, vocabularyFileURLs)
+    }
+}
+
+
 //    val rootObjectIRI =
 //        model.first { it.predicate == RDFS.COMMENT && it.`object` == Values.literal("RootObject") }.subject
 
@@ -70,28 +102,16 @@ fun main() {
     val model = readDirectory(directory)
 
 //    val property = Values.iri("https://w3id.org/schematransform/ExampleShape#idShape")
-//    val rootObject = m.findRootObject()  // TODO: Must be done within context of relevant constraint file.
 //    val q = ShaclQuery.fetchNodeShape(rootObject)
 //    val q = ShaclQuery.fetchPropertyShape(property)
 //    print(q)
 
-    // Via raw string.
-//    val q = "SELECT ?x ?y WHERE {?x rdf:type ?y}"
-
     val db = SailRepository(MemoryStore())
     try {
         db.connection.use { conn ->
-            conn.add(model) // TODO: Can be done directly from file with syntax similar to `parse`.
+            conn.add(model.data) // TODO: Can be done directly from file with syntax similar to `parse`.
 
-            val results = conn.prepareTupleQuery(getProfileResources()).evaluate()
-            val artifactsByRole = results
-                .groupBy({ it.getValue("role") }, { it.getValue("artifact") })
-
-            for (constraints in artifactsByRole[DXPROFILE.ROLE.CONSTRAINTS] ?: listOf()) {
-                // Build schema for this constraint file.
-                println("constraints: $constraints")
-                println("vocabs: ${artifactsByRole[DXPROFILE.ROLE.VOCABULARY]}")
-            }
+            buildSchemas(conn, model)
 
 
 //            val preparedQuery = conn.prepareTupleQuery(q)
@@ -105,6 +125,7 @@ fun main() {
 //                .groupBy({ it.name }, { it.value })
 //                .mapValues { it.value.distinct() }
 
+//            println(nodeShapeB)
 //            println(result.toMap())
 
         }
