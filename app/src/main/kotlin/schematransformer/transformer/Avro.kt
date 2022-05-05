@@ -9,8 +9,10 @@ import org.eclipse.rdf4j.model.vocabulary.SHACL
 import org.eclipse.rdf4j.model.vocabulary.SKOS
 import org.eclipse.rdf4j.repository.sail.SailRepository
 import org.eclipse.rdf4j.sail.memory.MemoryStore
+import schematransformer.getProfileResources
 import schematransformer.read.readDirectory
 import schematransformer.toMap
+import schematransformer.vocabulary.DXPROFILE
 import java.io.File
 
 
@@ -65,13 +67,11 @@ object ShaclQuery {
 
 fun main() {
     val directory = File("app/src/test/resources/rdfs")
-    val m = readDirectory(directory)
+    val model = readDirectory(directory)
 
-    // Via SparQLBuilder.
-//    val q = testSparqlBuilder().queryString
-    val property = Values.iri("https://w3id.org/schematransform/ExampleShape#idShape")
-    val rootObject = m.findRootObject()
-    val q = ShaclQuery.fetchNodeShape(rootObject)
+//    val property = Values.iri("https://w3id.org/schematransform/ExampleShape#idShape")
+//    val rootObject = m.findRootObject()  // TODO: Must be done within context of relevant constraint file.
+//    val q = ShaclQuery.fetchNodeShape(rootObject)
 //    val q = ShaclQuery.fetchPropertyShape(property)
 //    print(q)
 
@@ -81,10 +81,21 @@ fun main() {
     val db = SailRepository(MemoryStore())
     try {
         db.connection.use { conn ->
-            conn.add(m) // TODO: Can be done directly from file with syntax similar to `parse`.
+            conn.add(model) // TODO: Can be done directly from file with syntax similar to `parse`.
 
-            val preparedQuery = conn.prepareTupleQuery(q)
-            val result = preparedQuery.evaluate()
+            val results = conn.prepareTupleQuery(getProfileResources()).evaluate()
+            val schemas = results
+                .groupBy({ it.getValue("role") }, { it.getValue("artifact") })
+
+            for (constraints in schemas.filterKeys { it == DXPROFILE.ROLE.CONSTRAINTS }.values.flatten() ) {
+                println("constraints: $constraints")
+                println("vocabs: ${schemas[DXPROFILE.ROLE.VOCABULARY]}")
+            }
+
+
+
+//            val preparedQuery = conn.prepareTupleQuery(q)
+//            val result = preparedQuery.evaluate()
 
 //            val nodeShapeB = preparedQuery.evaluate()
 //                .map { res -> res.associateBy({ it.name }, { it.value }) }
@@ -94,7 +105,7 @@ fun main() {
 //                .groupBy({ it.name }, { it.value })
 //                .mapValues { it.value.distinct() }
 
-            println(result.toMap())
+//            println(result.toMap())
 
         }
     } finally {

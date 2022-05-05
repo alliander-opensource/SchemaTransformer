@@ -59,11 +59,18 @@ prof:ResourceDescriptor rdf:type owl:Class .
                      prof:hasArtifact "./ExampleShapeWithPropertyShape.ttl" ;
                      prof:hasRole role:constraints .
 
+:ConstraintsResource2 rdf:type owl:NamedIndividual ,
+                              prof:ResourceDescriptor ;
+                     dct:Format <https://www.w3.org/TR/turtle/> ;
+                     prof:hasArtifact "./AnotherConstraintsFile.ttl" ;
+                     prof:hasRole role:constraints .
+
 
 ###  https://w3id.org/schematransform/ExampleProfile#Profile
 :Profile rdf:type owl:NamedIndividual ,
                   prof:Profile ;
          prof:hasResource :ConstraintsResource ,
+                          :ConstraintsResource2 ,
                           :VocabularyResource .
 
 

@@ -18,7 +18,7 @@ fun getProfileResources() = """
     PREFIX prof: <http://www.w3.org/ns/dx/prof/>
     SELECT ?role ?artifact
     WHERE {
-        ?prof rdf:type prof:Profile .
+        ?prof rdf:type prof:Profile ;
               prof:hasResource ?resource .
               
         ?resource prof:hasRole ?role ;

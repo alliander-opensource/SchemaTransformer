@@ -8,4 +8,10 @@ object DXPROFILE {
     val HASRESOURCE = Values.iri("http://www.w3.org/ns/dx/prof/hasResource")
     val HASARTIFACT = Values.iri("http://www.w3.org/ns/dx/prof/hasArtifact")
     val HASROLE = Values.iri("http://www.w3.org/ns/dx/prof/hasRole")
+
+    object ROLE {
+        val CONSTRAINTS = Values.iri("http://www.w3.org/ns/dx/prof/role/constraints")
+        val VOCABULARY = Values.iri("http://www.w3.org/ns/dx/prof/role/vocabulary")
+    }
 }
+
