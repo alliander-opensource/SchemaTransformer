@@ -8,20 +8,10 @@ import org.eclipse.rdf4j.model.vocabulary.SKOS
 import org.eclipse.rdf4j.repository.sail.SailRepository
 import org.eclipse.rdf4j.repository.sail.SailRepositoryConnection
 import org.eclipse.rdf4j.sail.memory.MemoryStore
-import schematransformer.RdfModel
 import schematransformer.getProfileResources
 import schematransformer.read.readDirectory
 import schematransformer.vocabulary.DXPROFILE
 import java.io.File
-
-
-fun RdfModel.findRootObject(context: IRI): IRI? {
-    val matches = this.data.filter(null, RDFS.COMMENT, Values.literal("RootObject"), context)
-
-    return if (matches.isNotEmpty()) matches.first().subject as IRI
-    else null
-}
-
 
 object ShaclQuery {
     private fun prefixes(vararg vocab: Any): String =
@@ -33,10 +23,13 @@ object ShaclQuery {
             }
         }
 
-    fun fetchNodeShape(nodeShape: IRI): String = """
+    private fun fromNamed(vararg ctx: IRI): String = ctx.joinToString("\n") { "FROM NAMED <$it>" }
+
+    fun fetchNodeShape(nodeShape: IRI, vararg contexts: IRI): String = """
         ${prefixes(SHACL(), SKOS())}
         
         SELECT ?targetClass ?label ?comment ?property ?path
+        ${if (contexts.isNotEmpty()) fromNamed(*contexts) else ""}
         WHERE {
             <$nodeShape> sh:targetClass ?targetClass .
             
@@ -48,10 +41,11 @@ object ShaclQuery {
                          rdfs:comment|skos:definition ?comment .
         }""".trimIndent()
 
-    fun fetchPropertyShape(propertyShape: IRI): String = """
+    fun fetchPropertyShape(propertyShape: IRI, vararg contexts: IRI): String = """
         ${prefixes(SHACL(), SKOS())}
         
         SELECT ?path ?label ?rangeType ?comment ?minCount ?maxCount
+        ${if (contexts.isNotEmpty()) fromNamed(*contexts) else ""}
         WHERE {
             <$propertyShape> sh:path ?path .
             { <$propertyShape> sh:datatype|sh:node ?rangeType . }
@@ -64,11 +58,11 @@ object ShaclQuery {
         }
     """.trimIndent()
 
-    fun fetchRootObject(context: IRI): String = """
+    fun fetchRootObject(vararg contexts: IRI): String = """
         ${prefixes(SHACL())}
         
         SELECT ?root
-        FROM <$context>
+        ${if (contexts.isNotEmpty()) fromNamed(*contexts) else ""}
         WHERE {
             ?root a sh:NodeShape ;
                   rdfs:comment "RootObject" .
@@ -78,17 +72,32 @@ object ShaclQuery {
 fun getFileIRI(base: File, relativeURL: String): IRI =
     Values.iri(File(base, relativeURL).normalize().toURI().toString())
 
-fun buildSchema(conn: SailRepositoryConnection, constraintsNamedGraph: IRI, vocabularyNamedGraphs: List<IRI>): String? {
+fun buildSchemaMap(
+    conn: SailRepositoryConnection,
+    constraintsNamedGraph: IRI,
+    vocabularyNamedGraphs: List<IRI>
+): String? {
     println("constraints: $constraintsNamedGraph")
     println("vocabs: $vocabularyNamedGraphs")
 
-    val rootObject =
+    val rootObjectIRI =
         conn.prepareTupleQuery(ShaclQuery.fetchRootObject(constraintsNamedGraph)).evaluate()
             .flatten()
+            .map { it.value as IRI }
             .firstOrNull()
             ?: return null
 
-    println(rootObject)
+    val rootObjectQuery = ShaclQuery.fetchNodeShape(
+        rootObjectIRI,
+        constraintsNamedGraph,
+        *vocabularyNamedGraphs.toTypedArray()
+    )
+
+    val schema = conn.prepareTupleQuery(rootObjectQuery).evaluate()
+        .flatten()
+        .groupBy({ it.name }, { it.value })
+        .mapValues { it.value.distinct() }
+
     return ""
 }
 
@@ -102,13 +111,9 @@ fun buildSchemas(conn: SailRepositoryConnection, directory: File) {
         val vocabularyFileURLs =
             artifactsByRole[DXPROFILE.ROLE.VOCABULARY]?.map { getFileIRI(directory, it.stringValue()) } ?: listOf()
 
-        buildSchema(conn, constraintsFileURL, vocabularyFileURLs)
+        buildSchemaMap(conn, constraintsFileURL, vocabularyFileURLs)
     }
 }
-
-
-//    val rootObjectIRI =
-//        model.first { it.predicate == RDFS.COMMENT && it.`object` == Values.literal("RootObject") }.subject
 
 fun main() {
     val directory = File("app/src/test/resources/rdfs")
