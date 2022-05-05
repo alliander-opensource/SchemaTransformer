@@ -84,14 +84,14 @@ fun main() {
             conn.add(model) // TODO: Can be done directly from file with syntax similar to `parse`.
 
             val results = conn.prepareTupleQuery(getProfileResources()).evaluate()
-            val schemas = results
+            val artifactsByRole = results
                 .groupBy({ it.getValue("role") }, { it.getValue("artifact") })
 
-            for (constraints in schemas.filterKeys { it == DXPROFILE.ROLE.CONSTRAINTS }.values.flatten() ) {
+            for (constraints in artifactsByRole[DXPROFILE.ROLE.CONSTRAINTS] ?: listOf()) {
+                // Build schema for this constraint file.
                 println("constraints: $constraints")
-                println("vocabs: ${schemas[DXPROFILE.ROLE.VOCABULARY]}")
+                println("vocabs: ${artifactsByRole[DXPROFILE.ROLE.VOCABULARY]}")
             }
-
 
 
 //            val preparedQuery = conn.prepareTupleQuery(q)
