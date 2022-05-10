@@ -52,6 +52,8 @@ To define the constraints, the following constructs will be used for the transfo
 | [sh:path](http://www.w3.org/ns/shacl#path) | 
 | [sh:in](http://www.w3.org/ns/shacl#in) | 
 | [sh:node](http://www.w3.org/ns/shacl#node) |
+| [sh:node](http://www.w3.org/ns/shacl#and) |
+
 
 ![Constraint Diagram](./documentation/figures/ConstraintDiagram.svg "Constraint Diagram")
 
@@ -79,7 +81,7 @@ Apache Avro supports
 - objects
 - primitive attributes
 - relationships between objects
-- sub type relations
+- sub type (rdfs:subClassOf and/or sh:and) relations
     - the schema itself doesn't understand this, but the mapping can be configured such that it displays the correct label for the relationship 
 - limited cardinality (0,1,*)
 - tree structure
@@ -103,7 +105,7 @@ Apache Avro requires the definition of a Root Object. In the example profile, "B
 
 #### Mapping table
 
-| Some schema | Profile | notes |
+| Avro schema| Profile | notes |
 |:---|:---|:---|
 | record | [sh:NodeShape](http://www.w3.org/ns/shacl#NodeShape) | |
 | name of the record | [sh:targetClass](http://www.w3.org/ns/shacl#targetClass) | | 
@@ -114,9 +116,7 @@ Apache Avro requires the definition of a Root Object. In the example profile, "B
 | type = array | [sh:maxCount](http://www.w3.org/ns/shacl#maxCount) | if maxCount > 1 only supports cardinality of  *|
 | name of field| [sh:path](http://www.w3.org/ns/shacl#path) | |
 | enum | [sh:in](http://www.w3.org/ns/shacl#in) | |
-| add fields | [rdfs:subClassOf](http://www.w3.org/2000/01/rdf-schema#subClassOf) | Apply all sh:properties <br> of shapes describing super classes|
-| modify fields | [rdfs:subPropertyOf](http://www.w3.org/2000/01/rdf-schema#subPropertyOf) | replace super property by sub-property |
-
+|add fields|[sh:and](http://www.w3.org/ns/shacl#and)|Apply all sh:properties <br> in the target (range) of the target shape|
 
 
 #### Primitive mapping
