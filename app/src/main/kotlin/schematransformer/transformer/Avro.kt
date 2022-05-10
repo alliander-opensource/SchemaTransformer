@@ -1,5 +1,6 @@
 package schematransformer.transformer
 
+import arrow.optics.cons
 import org.eclipse.rdf4j.model.IRI
 import org.eclipse.rdf4j.model.Value
 import org.eclipse.rdf4j.model.util.Values
@@ -30,7 +31,8 @@ object ShaclQuery {
     fun fetchNodeShape(nodeShape: IRI, vararg contexts: IRI): String = """
         ${prefixes(SHACL(), SKOS())}
         
-        SELECT ?targetClass ?label ?comment ?property ?path
+        # SELECT ?targetClass ?label ?comment ?property ?path
+        SELECT *
         ${if (contexts.isNotEmpty()) from(*contexts) else ""}
         WHERE {
             <$nodeShape> sh:targetClass ?targetClass .
@@ -41,6 +43,41 @@ object ShaclQuery {
             
             ?targetClass rdfs:label|skos:prefLabel ?label ;
                          rdfs:comment|skos:definition ?comment .
+                         
+            ?property sh:path ?path .
+            { ?property sh:datatype|sh:node ?rangeType . }
+            OPTIONAL {
+                ?path rdfs:label|skos:prefLabel ?propLabel ;
+                      rdfs:comment|skos:definition ?propComment .
+                ?property sh:minCount ?minCount ;
+                          sh:maxCount ?maxCount .
+            }
+        }""".trimIndent()
+
+    fun fetchSchemaInfo(vararg contexts: IRI): String = """
+        ${prefixes(SHACL(), SKOS())}
+        
+        SELECT ?targetClass ?label ?comment ?property ?path ?rangeType ?minCount ?maxCount
+        ${if (contexts.isNotEmpty()) from(*contexts) else ""}
+        WHERE {
+            ?root a sh:NodeShape ;
+                  rdfs:comment "RootObject" .
+            ?root sh:targetClass ?targetClass .
+            
+            { ?root sh:property ?property . }
+            UNION
+            { ?root (sh:and/rdf:rest*/rdf:first/sh:property)+ ?property }
+            
+            ?targetClass rdfs:label|skos:prefLabel ?label ;
+                         rdfs:comment|skos:definition ?comment .
+            ?property sh:path ?path .
+            { ?property sh:datatype|sh:node ?rangeType . }
+            OPTIONAL {
+                ?path rdfs:label|skos:prefLabel ?label ;
+                      rdfs:comment|skos:definition ?comment .
+                ?property sh:minCount ?minCount ;
+                          sh:maxCount ?maxCount .
+            }
         }""".trimIndent()
 
     fun fetchPropertyShape(propertyShape: Value, vararg contexts: IRI): String {
@@ -94,13 +131,13 @@ fun buildSchemaMap(
     println("constraints: $constraintsNamedGraph")
     println("vocabs: $vocabularyNamedGraphs")
 
-    val rootObjectIRIQuery = ShaclQuery.fetchRootObject(constraintsNamedGraph)
-
-    val rootObjectIRI =
-        conn.prepareTupleQuery(rootObjectIRIQuery).evaluate()
-            .flatten()
-            .map { it.value as IRI }
-            .first()
+//    val rootObjectIRIQuery = ShaclQuery.fetchRootObject(constraintsNamedGraph)
+//
+//    val rootObjectIRI =
+//        conn.prepareTupleQuery(rootObjectIRIQuery).evaluate()
+//            .flatten()
+//            .map { it.value as IRI }
+//            .first()
 
 //    val testQ = """
 //    PREFIX sh: <http://www.w3.org/ns/shacl#>
@@ -116,18 +153,12 @@ fun buildSchemaMap(
     val activeGraph = vocabularyNamedGraphs.toTypedArray() + constraintsNamedGraph
 
 
-    val rootObjectQuery = ShaclQuery.fetchNodeShape(rootObjectIRI, *activeGraph)
+//    val rootObjectQuery = ShaclQuery.fetchNodeShape(rootObjectIRI, *activeGraph)
 
-    val schema = conn.prepareTupleQuery(rootObjectQuery).evaluate()
+    val schema = conn.prepareTupleQuery(ShaclQuery.fetchSchemaInfo(*activeGraph)).evaluate()
         .flatten()
         .groupBy({ it.name }, { it.value })
         .mapValues { it.value.distinct() }
-        .mapValues {
-            if (it.key == "property") {
-                conn.prepareTupleQuery(ShaclQuery.fetchPropertyShape(it.value.first(), *activeGraph)).evaluate()
-                    .map { r -> r }
-            } else it.value
-        }
 
 //    val enrichedSchema = schema["property"]?.map {
 //        conn.prepareTupleQuery(ShaclQuery.fetchPropertyShape(it, *activeGraph)).evaluate().map { r -> r }
@@ -135,6 +166,40 @@ fun buildSchemaMap(
 
     return ""
 }
+
+
+class BuildSchemaMap(
+    private val conn: SailRepositoryConnection,
+    private val constraintsNamedGraph: IRI,
+    private val vocabularyNamedGraphs: List<IRI>
+) {
+    private val activeGraphs
+        get() =
+            vocabularyNamedGraphs.toTypedArray() + constraintsNamedGraph
+
+    private fun getRootObjectIRI(): IRI {
+        val q = ShaclQuery.fetchRootObject(constraintsNamedGraph)
+
+        return conn.prepareTupleQuery(q).evaluate().first().first().value as IRI
+    }
+
+    private fun getNodeShape(n: IRI): Map<String, List<Value>> =
+        conn.prepareTupleQuery(ShaclQuery.fetchNodeShape(n, *activeGraphs)).evaluate()
+            .flatten()
+            .groupBy({ it.name }, { it.value })
+            .mapValues { it.value.distinct() }
+
+//    private fun getPropertyShape
+
+    fun build(nodeShape: IRI? = null): Any {
+        val rootObjectIRI = getRootObjectIRI()
+        val rootObj = getNodeShape(rootObjectIRI)
+//        val nodeShapes = rootObj["property"]?.map { getPropertyShape(it) }
+        println(rootObj)
+        return 1
+    }
+}
+
 
 fun buildSchemas(conn: SailRepositoryConnection, directory: File) {
     val resources = conn.prepareTupleQuery(getProfileResources()).evaluate()
@@ -146,7 +211,14 @@ fun buildSchemas(conn: SailRepositoryConnection, directory: File) {
         val vocabularyFileURLs =
             artifactsByRole[DXPROFILE.ROLE.VOCABULARY]?.map { getFileIRI(directory, it.stringValue()) } ?: listOf()
 
-        val schemaMap = buildSchemaMap(conn, constraintsFileURL, vocabularyFileURLs)
+//        val schemaMap = buildSchemaMap(conn, constraintsFileURL, vocabularyFileURLs)
+        val schemaBuilder = BuildSchemaMap(conn, constraintsFileURL, vocabularyFileURLs)
+        val q = ShaclQuery.fetchNodeShape(Values.iri("https://w3id.org/schematransform/ExampleShape#BShape"))
+        val x = conn.prepareTupleQuery(q).evaluate().map {it}
+
+        println(x)
+        schemaBuilder.build()
+        throw Exception()
         // TODO: buildSchema(schemaMap)
     }
 }
