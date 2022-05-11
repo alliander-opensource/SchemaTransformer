@@ -1,12 +1,14 @@
 package schematransformer
 
 import org.eclipse.rdf4j.model.IRI
+import org.eclipse.rdf4j.model.impl.BooleanLiteral
 import org.eclipse.rdf4j.model.util.Values
 import org.eclipse.rdf4j.model.vocabulary.SHACL
 import org.eclipse.rdf4j.model.vocabulary.SKOS
 import org.eclipse.rdf4j.repository.sail.SailRepository
 import org.eclipse.rdf4j.repository.sail.SailRepositoryConnection
 import org.eclipse.rdf4j.sail.memory.MemoryStore
+import org.eclipse.rdf4j.sail.memory.model.MemIRI
 import schematransformer.read.readDirectory
 import schematransformer.transformer.BuildSchemaMap
 import schematransformer.transformer.ShaclQuery
@@ -24,7 +26,7 @@ class SchemaBuilder(
         get() =
             vocabularyNamedGraphs.toTypedArray() + constraintsNamedGraph
 
-    private fun getRootObjectIRI(): IRI {
+    fun getRootObjectIRI(): IRI {
         val query = """
             PREFIX sh: <http://www.w3.org/ns/shacl#>
             SELECT ?root
@@ -37,12 +39,12 @@ class SchemaBuilder(
         return conn.prepareTupleQuery(query).evaluate().first().first().value as IRI
     }
 
-    private fun getNodeShape(nodeShapeIRI: IRI): Any {
+    private fun getNodeShape(nodeShapeIRI: IRI): Map<String, Any?> { // `?` because the type system cannot see my `filter` of non-null values.
         val query = """
             PREFIX sh: <http://www.w3.org/ns/shacl#>
             PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
             SELECT DISTINCT *
-            ${activeGraphs.map { "FROM <$it>" }.joinToString("\n")}
+            ${activeGraphs.joinToString("\n") { "FROM <$it>" }}
             WHERE {
                 <$nodeShapeIRI> sh:targetClass ?targetClass .
                 
@@ -71,31 +73,32 @@ class SchemaBuilder(
             "targetClass" to results[0]["targetClass"],
             "comment" to results[0]["comment"],
             "label" to results[0]["label"],
-            "property" to results.associate { p ->
-                p["property"] to mapOf(
-                    "iri" to p["property"],
-                    "path" to p["propPath"],
-                    "rangeType" to p["propRangeType"],
-                    "isNode" to p["propIsNode"],
-                    "label" to p["propLabel"],
-                    "comment" to p["propComment"],
-                    "minCount" to p["propMinCount"],
-                    "maxCount" to p["propMaxCount"],
-                ).filter { it.value != null }
+            "property" to results.associate {
+                it["property"].toString() to mutableMapOf(
+                    "path" to it["propPath"],
+                    "rangeType" to it["propRangeType"],
+                    "isNode" to it["propIsNode"],
+                    "label" to it["propLabel"],
+                    "comment" to it["propComment"],
+                    "minCount" to it["propMinCount"],
+                    "maxCount" to it["propMaxCount"],
+                ).filter { entry -> entry.value != null }
             }
         )
 
-
-        println(obj)
-
-        return results
+        return obj
     }
 
-    fun build(nodeShape: IRI? = null): Any {
-        val rootObjectIRI = getRootObjectIRI()
-        val rootObj = getNodeShape(rootObjectIRI)
-//        val nodeShapes = rootObj["property"]?.map { getPropertyShape(it) }
-        return rootObj
+    fun build(nodeShapeIRI: IRI): Any {
+        val nodeShape = getNodeShape(nodeShapeIRI)
+        val properties = nodeShape["property"] as Map<String, MutableMap<Any, Any>>
+        for (v in properties.values) {
+
+            if (!(v["isNode"] as BooleanLiteral).booleanValue()) continue
+            v["node"] = build(v["rangeType"] as MemIRI)
+        }
+
+    return nodeShape
     }
 }
 
@@ -112,10 +115,10 @@ fun main() {
                 Values.iri("file:/home/bartkl/Programming/alliander-opensource/SchemaTransformer/app/src/test/resources/rdfs/ExampleShapeWithPropertyShape.ttl")
             val vocabularyIRI =
                 Values.iri("file:/home/bartkl/Programming/alliander-opensource/SchemaTransformer/app/src/test/resources/rdfs/ExampleVocabulary.ttl")
-            val rootObjectIRI = Values.iri("https://w3id.org/schematransform/ExampleShape#BShape")
             val schemaBuilder = SchemaBuilder(conn, constraintsIRI, arrayListOf(vocabularyIRI))
-
-            val rootObject = schemaBuilder.build(rootObjectIRI)
+            val rootObjectIRI = schemaBuilder.getRootObjectIRI()
+            val schema = schemaBuilder.build(rootObjectIRI)
+            println(schema)
         }
     } finally {
         db.shutDown()
