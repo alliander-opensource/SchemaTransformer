@@ -66,12 +66,12 @@ class SchemaBuilder(
         val results = conn.prepareTupleQuery(query).evaluate()
             .map { row -> row.associate { it.name to it.value }.toMap() }
 
-        val obj = mapOf(
+        val obj = mutableMapOf(
             "targetClass" to results[0]["targetClass"],
             "comment" to results[0]["comment"],
             "label" to results[0]["label"],
-            "property" to results.associate {
-                it["property"].toString() to mutableMapOf(  // TODO: Now you get key "null" if there are no properties.
+            "property" to results.filter { it["property"] != null }.associate {
+                it["property"].toString() to mutableMapOf(
                     "path" to it["propPath"],
                     "rangeType" to it["propRangeType"],
                     "isNode" to it["propIsNode"],
@@ -82,19 +82,23 @@ class SchemaBuilder(
                 ).filter { entry -> entry.value != null }
             }
         )
+        if ((obj["property"] as MutableMap<String, Any?>).isEmpty()) {
+            obj.remove("property")
+        }
 
         return obj
     }
 
     fun build(nodeShapeIRI: IRI): Any {
         val nodeShape = getNodeShape(nodeShapeIRI)
-        val properties = nodeShape["property"] as Map<String, MutableMap<Any, Any>>
+        val properties =
+            nodeShape.getOrDefault("property", mutableMapOf<String, Any>()) as Map<String, MutableMap<Any, Any>>
         for (v in properties.values) {
             if (v.isEmpty() || !(v["isNode"] as BooleanLiteral).booleanValue()) continue
             v["node"] = build(v["rangeType"] as MemIRI)
         }
 
-    return nodeShape
+        return nodeShape
     }
 }
 
