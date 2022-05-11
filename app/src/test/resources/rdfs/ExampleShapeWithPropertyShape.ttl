@@ -9,8 +9,8 @@
 
 shape:AShape
     a sh:NodeShape ;
-    rdfs:comment "RootObject" ;
     sh:targetClass vocab:A ;
+    rdfs:comment "RootObject" ;
     sh:and (:EShape :CShape) ;
     sh:property shape:idShape;
     sh:property [

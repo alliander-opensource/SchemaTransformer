@@ -3,18 +3,11 @@ package schematransformer
 import org.eclipse.rdf4j.model.IRI
 import org.eclipse.rdf4j.model.impl.BooleanLiteral
 import org.eclipse.rdf4j.model.util.Values
-import org.eclipse.rdf4j.model.vocabulary.SHACL
-import org.eclipse.rdf4j.model.vocabulary.SKOS
 import org.eclipse.rdf4j.repository.sail.SailRepository
 import org.eclipse.rdf4j.repository.sail.SailRepositoryConnection
 import org.eclipse.rdf4j.sail.memory.MemoryStore
 import org.eclipse.rdf4j.sail.memory.model.MemIRI
 import schematransformer.read.readDirectory
-import schematransformer.transformer.BuildSchemaMap
-import schematransformer.transformer.ShaclQuery
-import schematransformer.transformer.buildSchemas
-import schematransformer.transformer.getFileIRI
-import schematransformer.vocabulary.DXPROFILE
 import java.io.File
 
 class SchemaBuilder(
@@ -48,21 +41,25 @@ class SchemaBuilder(
             WHERE {
                 <$nodeShapeIRI> sh:targetClass ?targetClass .
                 
-                { <$nodeShapeIRI> sh:property ?property . }
-                UNION
-                { <$nodeShapeIRI> (sh:and/rdf:rest*/rdf:first/sh:property)+ ?property }
-                
                 ?targetClass rdfs:label|skos:prefLabel ?label ;
                              rdfs:comment|skos:definition ?comment .
-                             
-                ?property sh:path ?propPath ;
-                          sh:datatype|sh:node ?propRangeType .
-                BIND(EXISTS { ?property sh:node ?propRangeType } AS ?propIsNode)
+                
                 OPTIONAL {
+                    { <$nodeShapeIRI> sh:property ?property }
+                    UNION
+                    { <$nodeShapeIRI> (sh:and/rdf:rest*/rdf:first/sh:property)+ ?property }
+                    
+                    ?property sh:path ?propPath ;
+                              sh:datatype|sh:node ?propRangeType .
+                    BIND(EXISTS { ?property sh:node ?propRangeType } AS ?propIsNode)
+                    
+                    OPTIONAL {
                     ?propPath rdfs:label|skos:prefLabel ?propLabel ;
-                              rdfs:comment|skos:definition ?propComment .
+                              rdfs:comment|skos:definition ?propComment . }
+                    OPTIONAL {
                     ?property sh:minCount ?propMinCount ;
                               sh:maxCount ?propMaxCount .
+                    }
                 }
             }""".trimIndent()
 
@@ -74,7 +71,7 @@ class SchemaBuilder(
             "comment" to results[0]["comment"],
             "label" to results[0]["label"],
             "property" to results.associate {
-                it["property"].toString() to mutableMapOf(
+                it["property"].toString() to mutableMapOf(  // TODO: Now you get key "null" if there are no properties.
                     "path" to it["propPath"],
                     "rangeType" to it["propRangeType"],
                     "isNode" to it["propIsNode"],
@@ -93,8 +90,7 @@ class SchemaBuilder(
         val nodeShape = getNodeShape(nodeShapeIRI)
         val properties = nodeShape["property"] as Map<String, MutableMap<Any, Any>>
         for (v in properties.values) {
-
-            if (!(v["isNode"] as BooleanLiteral).booleanValue()) continue
+            if (v.isEmpty() || !(v["isNode"] as BooleanLiteral).booleanValue()) continue
             v["node"] = build(v["rangeType"] as MemIRI)
         }
 
