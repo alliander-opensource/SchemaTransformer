@@ -65,34 +65,26 @@ class SchemaBuilder(
             }""".trimIndent()
 
         val results = conn.prepareTupleQuery(query).evaluate()
-            .map { row -> row.associate { it.name to it.value }.toMutableMap<Any, Any?>() }
+            .map { row -> row.associate { it.name to it.value }.toMap() }
 
-        results.forEach { row ->
-            row["property"] = mutableMapOf<Any, Any?>(
-                "iri" to row["property"],
-                "path" to row["propPath"],
-                "rangeType" to row["propRangeType"],
-                "isNode" to row["propIsNode"],
-                "label" to row["propLabel"],
-                "comment" to row["propComment"],
-                "minCount" to row["propMinCount"],
-                "maxCount" to row["propMaxCount"],
-            )
-            row.remove("propPath")
-            row.remove("propRangeType")
-            row.remove("propIsNode")
-            row.remove("propLabel")
-            row.remove("propComment")
-            row.remove("propMinCount")
-            row.remove("propMaxCount")
-        }  // TODO: Delete those keys from the top-level.
-
-        val obj = mapOf<Any, Any?>(
+        val obj = mapOf(
             "targetClass" to results[0]["targetClass"],
             "comment" to results[0]["comment"],
             "label" to results[0]["label"],
-            "property" to results.associate { (it["property"] as LinkedHashMap<Any, Any?>)["iri"] to it["property"] }
+            "property" to results.associate { p ->
+                p["property"] to mapOf(
+                    "iri" to p["property"],
+                    "path" to p["propPath"],
+                    "rangeType" to p["propRangeType"],
+                    "isNode" to p["propIsNode"],
+                    "label" to p["propLabel"],
+                    "comment" to p["propComment"],
+                    "minCount" to p["propMinCount"],
+                    "maxCount" to p["propMaxCount"],
+                ).filter { it.value != null }
+            }
         )
+
 
         println(obj)
 
