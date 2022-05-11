@@ -183,7 +183,7 @@ class BuildSchemaMap(
         return conn.prepareTupleQuery(q).evaluate().first().first().value as IRI
     }
 
-    private fun getNodeShape(n: IRI): Map<String, List<Value>> =
+    private fun getNodeShape(n: IRI): Any =
         conn.prepareTupleQuery(ShaclQuery.fetchNodeShape(n, *activeGraphs)).evaluate()
             .flatten()
             .groupBy({ it.name }, { it.value })
@@ -214,7 +214,7 @@ fun buildSchemas(conn: SailRepositoryConnection, directory: File) {
 //        val schemaMap = buildSchemaMap(conn, constraintsFileURL, vocabularyFileURLs)
         val schemaBuilder = BuildSchemaMap(conn, constraintsFileURL, vocabularyFileURLs)
         val q = ShaclQuery.fetchNodeShape(Values.iri("https://w3id.org/schematransform/ExampleShape#BShape"))
-        val x = conn.prepareTupleQuery(q).evaluate().map {it}
+        val x = conn.prepareTupleQuery(q).evaluate().map { it }
 
         println(x)
         schemaBuilder.build()
