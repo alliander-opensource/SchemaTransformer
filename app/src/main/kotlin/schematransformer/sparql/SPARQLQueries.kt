@@ -97,14 +97,12 @@ object SPARQLQueries {
                         properties = results.associate {
                             it["property"]!!.stringValue() to PropertyShape(
                                 path = it["propPath"] as Value,
-                                node = null,
-                                datatype = null,
-//                                node = (if ((it.getValue("propIsNode") as BooleanLiteral).booleanValue())
-//                                    getNodeShape(it.getValue("propRangeType") as IRI)
-//                                else null),
-//                                datatype = (if ((it.getValue("propIsNode") as BooleanLiteral).booleanValue())
-//                                    null
-//                                else it.getValue("propRangeType")),
+                                node = (if ((it["propIsNode"] as BooleanLiteral).booleanValue())
+                                            it["propRangeType"] as IRI
+                                        else null),
+                                datatype = (if ((it["propIsNode"] as BooleanLiteral).booleanValue())
+                                            null
+                                        else it["propRangeType"]),
                                 label = it["propLabel"]?.stringValue(),
                                 comment = it["propComment"]?.stringValue(),
                                 minCount = (it["propMinCount"] as IntegerMemLiteral?)?.intValue(),
