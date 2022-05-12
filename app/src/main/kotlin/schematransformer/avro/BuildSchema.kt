@@ -6,7 +6,6 @@ import org.eclipse.rdf4j.repository.sail.SailRepositoryConnection
 import schematransformer.NoRootObjectException
 import schematransformer.sparql.SPARQLQueries
 import schematransformer.util.getFileIRI
-import schematransformer.util.query
 import schematransformer.vocabulary.DXPROFILE
 import java.io.File
 
@@ -20,7 +19,8 @@ fun buildSchema(
     constraintsGraph: IRI,
     vararg vocabularyGraphs: IRI
 ): Schema {
-    return rootObjectIRI as Schema
+    val ns = SPARQLQueries.getNodeShape(conn, rootObjectIRI, withProperties = true, constraintsGraph, *vocabularyGraphs)
+    return ns
 }
 
 fun buildSchemas(conn: SailRepositoryConnection, directory: File): MutableList<Schema> {
