@@ -14,7 +14,8 @@ fun main() {
     try {
         db.connection.use { conn ->
             conn.add(model.data)
-            buildSchemas(conn, model.path)
+            val schemas = buildSchemas(conn, model.path)
+            println(schemas)
         }
     } finally {
         db.shutDown()

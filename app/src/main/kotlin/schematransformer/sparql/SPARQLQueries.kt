@@ -48,7 +48,6 @@ object SPARQLQueries {
     fun getNodeShape(
         conn: SailRepositoryConnection,
         nodeShapeIRI: IRI,
-        withProperties: Boolean = true,
         vararg context: IRI
     ): NodeShape =
         with(
@@ -68,7 +67,6 @@ object SPARQLQueries {
                     UNION
                     { <$nodeShapeIRI> (sh:and/rdf:rest*/rdf:first/sh:property)+ ?property }
                     
-                ${if (withProperties) """
                     ?property sh:path ?propPath ;
                               sh:datatype|sh:node ?propRangeType .
                     BIND(EXISTS { ?property sh:node ?propRangeType } AS ?propIsNode)
@@ -80,7 +78,6 @@ object SPARQLQueries {
                     ?property sh:minCount ?propMinCount ;
                               sh:maxCount ?propMaxCount .
                     }
-                """ else ""}
                 }
         }
     """.trimIndent()
@@ -94,15 +91,15 @@ object SPARQLQueries {
                     NodeShape(targetClass = results[0]["targetClass"] as IRI,
                         label = results[0]["label"]?.stringValue(),
                         comment = results[0]["comment"]?.stringValue(),
-                        properties = results.associate {
+                        properties = results.filter { it["property"] != null }.associate {
                             it["property"]!!.stringValue() to PropertyShape(
-                                path = it["propPath"] as Value,
+                                path = it["propPath"] as IRI,
                                 node = (if ((it["propIsNode"] as BooleanLiteral).booleanValue())
                                             it["propRangeType"] as IRI
                                         else null),
-                                datatype = (if ((it["propIsNode"] as BooleanLiteral).booleanValue())
-                                            null
-                                        else it["propRangeType"]),
+                                datatype = (if (!(it["propIsNode"] as BooleanLiteral).booleanValue())
+                                            it["propRangeType"] as IRI
+                                        else null),
                                 label = it["propLabel"]?.stringValue(),
                                 comment = it["propComment"]?.stringValue(),
                                 minCount = (it["propMinCount"] as IntegerMemLiteral?)?.intValue(),
