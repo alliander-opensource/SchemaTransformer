@@ -1,4 +1,4 @@
-package schematransformer
+package old.avro
 
 import org.apache.avro.Schema
 import org.apache.avro.SchemaBuilder

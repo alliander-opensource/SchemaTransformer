@@ -70,7 +70,7 @@ prof:ResourceDescriptor rdf:type owl:Class .
 :Profile rdf:type owl:NamedIndividual ,
                   prof:Profile ;
          prof:hasResource :ConstraintsResource ,
-                          :ConstraintsResource2 ,
+#                          :ConstraintsResource2 ,
                           :VocabularyResource .
 
 

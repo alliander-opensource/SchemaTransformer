@@ -6,7 +6,7 @@ import org.eclipse.rdf4j.model.impl.TreeModel
 import org.eclipse.rdf4j.model.util.Values
 import org.eclipse.rdf4j.rio.Rio
 import org.eclipse.rdf4j.rio.UnsupportedRDFormatException
-import schematransformer.RdfModel
+import schematransformer.type.RdfModel
 
 val SUPPORTED_FILE_EXTENSIONS = listOf("ttl", "xml", "jsonld")
 

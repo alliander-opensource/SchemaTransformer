@@ -1,11 +1,11 @@
-package schematransformer
+package old.avro
 
 import com.github.avrokotlin.avro4k.Avro
 import kotlinx.serialization.Serializable
 
 
 @Serializable
-data class Ingredient(val name: String, val sugar: Double, val fat: Double)
+data class Ingredient(val name: String?, val sugar: Double, val fat: Double)
 
 @Serializable
 data class Pizza(val name: String, val ingredients: List<Ingredient>, val vegetarian: Boolean, val kcals: Int)

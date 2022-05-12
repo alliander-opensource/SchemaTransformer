@@ -1,4 +1,4 @@
-package schematransformer
+package old.avro
 
 import org.eclipse.rdf4j.model.IRI
 import org.eclipse.rdf4j.model.impl.BooleanLiteral

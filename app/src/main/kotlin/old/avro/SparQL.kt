@@ -1,4 +1,4 @@
-package schematransformer
+package old.avro
 
 import org.eclipse.rdf4j.query.TupleQueryResult
 import org.eclipse.rdf4j.repository.sail.SailRepository
