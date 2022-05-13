@@ -16,7 +16,7 @@
 ###  https://w3id.org/schematransform/ExampleVocabulary#FromAToC
 vocab:FromAToC rdf:type owl:ObjectProperty ;
                rdfs:domain vocab:A ;
-               rdfs:range vocab:D ;
+               rdfs:range vocab:C ;
                rdfs:label "VanANaarC"@nl .
 
 
@@ -44,7 +44,8 @@ vocab:FromDtoB rdf:type owl:ObjectProperty ;
 ###  https://w3id.org/schematransform/ExampleVocabulary#FromEtoC
 vocab:FromEtoC rdf:type owl:ObjectProperty ;
                rdfs:subPropertyOf vocab:FromAToC ;
-               rdfs:domain vocab:E .
+               rdfs:domain vocab:E ;
+               rdfs:range vocab:C .
 
 
 #################################################################
@@ -66,6 +67,11 @@ vocab:bcd rdf:type owl:DatatypeProperty ;
 ###  https://w3id.org/schematransform/ExampleVocabulary#def
 vocab:def rdf:type owl:DatatypeProperty ;
           rdfs:domain vocab:D ;
+          rdfs:range xsd:integer .
+
+###  https://w3id.org/schematransform/ExampleVocabulary#def
+vocab:id rdf:type owl:DatatypeProperty ;
+          rdfs:domain owl:Thing ;
           rdfs:range xsd:integer .
 
 

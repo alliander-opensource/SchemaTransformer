@@ -1,0 +1,48 @@
+@startuml exampleConstraintDiagram
+
+skinparam class {
+    BackgroundColor lightGrey
+    BorderColor Black
+    ArrowColor Black
+    fixCircleLabelOverlapping true
+    linetype ortho
+}
+
+skinparam fixCircleLabelOverlapping true
+skinparam linetype ortho
+
+class "vocab:A" {
+    vocab:abc : xsd:dateTime 0..5
+    vocab:id : xsd:string 1..1
+}
+
+class "vocab:B" {
+    vocab:bcd : xsd:double 2..*
+}
+
+enum "vocab:C" {
+    vocab:individual1
+    vocab:individual2
+    vocab:individual3
+}
+
+class "vocab:D" {
+    vocab:def : xsd:int 0..1
+    vocab:id : xsd:string 1..1
+}
+
+class "vocab:E" 
+
+
+"vocab:A" --> "vocab:C" :  "vocab:FromAToC 1..1"
+
+"vocab:B" --|> "vocab:A" : "sh:and"
+"vocab:B" --> "vocab:D" : "vocab:FromBtoD 0..1"
+"vocab:B" --> "vocab:D" : "vocab:FromBtoDButSomehowDifferent 1..1"
+
+"vocab:D" --> "vocab:B" : "vocab:FromDtoB 1..3"
+
+"vocab:E" --|> "vocab:A" : "sh:and"
+"vocab:E" --> "vocab:C" : "vocab:FromEtoC 0..1"
+
+@enduml

@@ -1,0 +1,50 @@
+@startuml
+
+skinparam class {
+    BackgroundColor White
+    BorderColor Black
+    ArrowColor Black
+    RoundCorner 20
+}
+
+class "owl:Thing" {
+    vocab:id : xsd:string
+    
+}
+
+class "vocab:A" {
+    vocab:FromAToC : vocab:C
+    vocab:abc : xsd:dateTime
+}
+class "vocab:B" {
+    vocab:bcd : xsd:double
+}
+
+enum "vocab:C" {
+    vocab:individual1
+    vocab:individual2
+    vocab:individual3
+}
+
+class "vocab:D" {
+    vocab:def : xsd:int
+}
+
+class "vocab:E" 
+
+"vocab:A" --|> "owl:Thing" : "rdfs:subClassOf"
+"vocab:A" --> "vocab:C" :  "vocab:FromAToC"
+
+"vocab:B" --|> "vocab:A" : "rdfs:subClassOf"
+"vocab:B" --> "vocab:D" : "vocab:FromBtoD"
+"vocab:B" --> "vocab:D" : "vocab:FromBtoDButSomehowDifferent"
+
+"vocab:C" --|> "owl:Thing" : "rdfs:subClassOf"
+
+"vocab:D" --|> "owl:Thing" : "rdfs:subClassOf"
+"vocab:D" --> "vocab:B" : "vocab:FromDtoB"
+
+"vocab:E" --|> "owl:Thing" : "rdfs:subClassOf"
+"vocab:E" --> "vocab:C" : "vocab:FromEtoC"
+
+@enduml
