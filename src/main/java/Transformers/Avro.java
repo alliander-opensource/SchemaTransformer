@@ -8,6 +8,7 @@ import org.apache.avro.SchemaBuilder;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -185,8 +186,8 @@ public class Avro {
         return schema;
     }
 
-    public void writeToAvro(Schema schema) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter("test.avsc"));
+    public void writeToAvro(Schema schema, Path name, String output) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(output + "/" +name.getFileName().toString() + ".avsc"));
         writer.write(schema.toString());
         writer.close();
     }
