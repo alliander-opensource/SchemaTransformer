@@ -10,7 +10,6 @@
 shape:AShape
     a sh:NodeShape ;
     sh:targetClass vocab:A ;
-    rdfs:comment "RootObject" ;
     sh:and (:EShape :CShape) ;
     sh:property shape:idShape;
     sh:property [
@@ -51,12 +50,13 @@ shape:BShape
 
 shape:CShape
     a sh:NodeShape ;
+    rdfs:comment "RootObject" ;
     sh:targetClass vocab:C ;
     sh:in (
           vocab:individual1
           vocab:individual2
           vocab:Individual3
-      ).
+      ) .
 
 
 shape:DShape

@@ -11,6 +11,7 @@ data class PropertyShape(
     val comment: String?,
     val minCount: Int?,
     val maxCount: Int?,
+    val `in`: List<IRI>?,  // Cannot reuse.
 )
 
 data class NodeShape(
@@ -18,4 +19,5 @@ data class NodeShape(
     val label: String?,
     val comment: String?,
     val properties: Map<String, PropertyShape>?,
+    val `in`: List<IRI>?,
 )

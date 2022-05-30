@@ -43,25 +43,30 @@ fun buildSchema(
     val nodeShape =
         SPARQLQueries.getNodeShape(conn, nodeShapeIRI, constraintsGraph, *vocabularyGraphs)
 
-    val schema = SchemaBuilder.record(nodeShape.targetClass.localName)
-        .doc(nodeShape.comment)
-        .aliases(nodeShape.label)
+    if (nodeShape.`in` != null) {
+        return SchemaBuilder.enumeration(nodeShape.targetClass.localName)
+            .symbols(*nodeShape.`in`.map { it.localName }.toTypedArray())
+    } else {
+        val schema = SchemaBuilder.record(nodeShape.targetClass.localName)
+            .doc(nodeShape.comment)
+            .aliases(nodeShape.label)
 
-    var fields = schema.fields()
+        var fields = schema.fields()
 
-    nodeShape.properties?.values?.forEach { p ->
-        if (p.datatype != null) {
-            fields = fields.name(p.path.localName).type(primitivesMapping[p.datatype.localName]).noDefault()
+        nodeShape.properties?.values?.forEach { p ->
+            fields = if (p.datatype != null) {
+                fields.name(p.path.localName).type(primitivesMapping[p.datatype.localName]).noDefault()
 
-        } else if (p.node != null) {
-            fields = fields.name(p.path.localName).type(buildSchema(conn, p.node, constraintsGraph, *vocabularyGraphs))
-                .noDefault()
-        } else {
-            TODO() // Exception?
+            } else if (p.node != null) {
+                fields.name(p.path.localName).type(buildSchema(conn, p.node, constraintsGraph, *vocabularyGraphs))
+                    .noDefault()
+            } else {
+                TODO() // Exception?
+            }
+
         }
-
+        return fields.endRecord()
     }
-    return fields.endRecord()
 
 
 //                    .name("id").type().stringType().noDefault()

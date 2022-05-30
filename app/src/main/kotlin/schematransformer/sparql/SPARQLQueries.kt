@@ -61,6 +61,8 @@ object SPARQLQueries {
                 
                 ?targetClass rdfs:label|skos:prefLabel ?label ;
                              rdfs:comment|skos:definition ?comment .
+                             
+                OPTIONAL { <$nodeShapeIRI> (sh:in/rdf:rest*/rdf:first)+ ?enum }
                 
                 OPTIONAL {
                     { <$nodeShapeIRI> sh:property ?property }
@@ -70,7 +72,6 @@ object SPARQLQueries {
                     ?property sh:path ?propPath ;
                               sh:datatype|sh:node ?propRangeType .
                     BIND(EXISTS { ?property sh:node ?propRangeType } AS ?propIsNode)
-                    
                     OPTIONAL {
                     ?propPath rdfs:label|skos:prefLabel ?propLabel ;
                               rdfs:comment|skos:definition ?propComment . }
@@ -91,19 +92,21 @@ object SPARQLQueries {
                     NodeShape(targetClass = results[0]["targetClass"] as IRI,
                         label = results[0]["label"]?.stringValue(),
                         comment = results[0]["comment"]?.stringValue(),
+                        `in` = results.map { it["enum"] as IRI },
                         properties = results.filter { it["property"] != null }.associate {
                             it["property"]!!.stringValue() to PropertyShape(
                                 path = it["propPath"] as IRI,
                                 node = (if ((it["propIsNode"] as BooleanLiteral).booleanValue())
-                                            it["propRangeType"] as IRI
-                                        else null),
+                                    it["propRangeType"] as IRI
+                                else null),
                                 datatype = (if (!(it["propIsNode"] as BooleanLiteral).booleanValue())
-                                            it["propRangeType"] as IRI
-                                        else null),
+                                    it["propRangeType"] as IRI
+                                else null),
                                 label = it["propLabel"]?.stringValue(),
                                 comment = it["propComment"]?.stringValue(),
                                 minCount = (it["propMinCount"] as IntegerMemLiteral?)?.intValue(),
                                 maxCount = (it["propMaxCount"] as IntegerMemLiteral?)?.intValue(),
+                                `in` = null,
                             )
                         }
                     )
