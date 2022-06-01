@@ -89,14 +89,14 @@ object SPARQLQueries {
                         .associate { it.name to it.value }
                         .filter { it.value != null }
                 }.let { results ->
-                    NodeShape(targetClass = results[0]["targetClass"] as IRI,
+                    NodeShape(targetClass = results[0]["targetClass"] as IRI,  // @Ritger: de query result vars zijn niet lekker typed, rommelig inconsistent zo. @TOOO: query builder?
                         label = results[0]["label"]?.stringValue(),
                         comment = results[0]["comment"]?.stringValue(),
-                        `in` = results.map { it["enum"] as IRI },
+                        `in` = results.map { it["enum"] as? IRI },
                         properties = results.filter { it["property"] != null }.associate {
                             it["property"]!!.stringValue() to PropertyShape(
                                 path = it["propPath"] as IRI,
-                                node = (if ((it["propIsNode"] as BooleanLiteral).booleanValue())
+                                node = (if ((it["propIsNode"] as BooleanLiteral).booleanValue())  // @Ritger: dit soort casting en customness is erg vervelend en krijg je al snel types.
                                     it["propRangeType"] as IRI
                                 else null),
                                 datatype = (if (!(it["propIsNode"] as BooleanLiteral).booleanValue())
@@ -104,8 +104,8 @@ object SPARQLQueries {
                                 else null),
                                 label = it["propLabel"]?.stringValue(),
                                 comment = it["propComment"]?.stringValue(),
-                                minCount = (it["propMinCount"] as IntegerMemLiteral?)?.intValue(),
-                                maxCount = (it["propMaxCount"] as IntegerMemLiteral?)?.intValue(),
+                                minCount = (it["propMinCount"] as? IntegerMemLiteral)?.intValue(),
+                                maxCount = (it["propMaxCount"] as? IntegerMemLiteral)?.intValue(),
                                 `in` = null,
                             )
                         }

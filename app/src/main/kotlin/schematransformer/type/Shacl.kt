@@ -11,7 +11,7 @@ data class PropertyShape(
     val comment: String?,
     val minCount: Int?,
     val maxCount: Int?,
-    val `in`: List<IRI>?,  // Cannot reuse.
+    val `in`: List<IRI>?,
 )
 
 data class NodeShape(
@@ -19,5 +19,10 @@ data class NodeShape(
     val label: String?,
     val comment: String?,
     val properties: Map<String, PropertyShape>?,
-    val `in`: List<IRI>?,
+    val `in`: List<IRI?>?,
 )
+
+/* Voor Ritger.
+    - Al die optionality, nested zelfs (zoals `in`). Is dit echt normaal of doe ik iets onhandig?
+    - Geen mogelijkheid om te re-usen van properties
+ */
