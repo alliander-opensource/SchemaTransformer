@@ -6,6 +6,7 @@ import org.eclipse.rdf4j.model.IRI
 import org.eclipse.rdf4j.repository.sail.SailRepositoryConnection
 import schematransformer.NoRootObjectException
 import schematransformer.sparql.SPARQLQueries
+import schematransformer.type.NodeShape
 import schematransformer.util.getFileIRI
 import schematransformer.vocabulary.DXPROFILE
 import java.io.File
@@ -25,57 +26,66 @@ val primitivesMapping = mapOf(
     "anyURI" to "string",
 )
 
+fun buildEnumSchema(nodeShape: NodeShape): Schema =
+    SchemaBuilder.enumeration(nodeShape.targetClass.localName)
+        .symbols(
+            *nodeShape.`in`?.map { it.localName }?.toTypedArray() ?: throw IllegalStateException()
+        )
+
+fun buildRecordSchema(
+    conn: SailRepositoryConnection,
+    nodeShape: NodeShape,
+    constraintsGraph: IRI,
+    ancestorsPath: List<IRI> = listOf(),
+    vararg vocabularyGraphs: IRI
+): Schema {
+    val schema = SchemaBuilder.record(nodeShape.targetClass.localName)
+        .doc(nodeShape.comment)
+        .aliases(nodeShape.label)
+
+    var fields = schema.fields()
+
+    nodeShape.properties?.values?.forEach { p ->
+        fields = if (p.datatype != null) {
+            fields.name(p.path.localName).type(primitivesMapping[p.datatype.localName]).noDefault()
+
+        } else if (p.node != null && p.node !in ancestorsPath) {
+            fields.name(p.path.localName)
+                .type(buildSchema(conn, p.node, constraintsGraph, ancestorsPath + p.node, *vocabularyGraphs))
+                .noDefault()
+        } else {
+            return fields.endRecord()
+        }
+
+    }
+    return fields.endRecord()
+}
+
 
 fun buildSchema(
     conn: SailRepositoryConnection,
     nodeShapeIRI: IRI,
     constraintsGraph: IRI,
+    ancestorsPath: List<IRI> = listOf(),
     vararg vocabularyGraphs: IRI
-): Schema {
-    fun go(
-        conn: SailRepositoryConnection,
-        nodeShapeIRI: IRI,
-        constraintsGraph: IRI,
-        ancestorsPath: List<IRI> = listOf(),
-        vararg vocabularyGraphs: IRI
-    ): Schema {
-        val nodeShape =
-            SPARQLQueries.getNodeShape(conn, nodeShapeIRI, constraintsGraph, *vocabularyGraphs)
+): Schema =
+    /*
+    Clean up:
+    1. More `when` expressions perhaps?
+    2. More functions I think.
+    3. Repetition of fields.endRecord
+    4. All the mutation and imperative code: is there a different way?
 
-        if (nodeShape.`in` != null && nodeShape.`in`.isNotEmpty()) {
-            return SchemaBuilder.enumeration(nodeShape.targetClass.localName)
-                .symbols(*nodeShape.`in`.map { it.localName }.toTypedArray())
-        } else {
-            val schema = SchemaBuilder.record(nodeShape.targetClass.localName)
-                .doc(nodeShape.comment)
-                .aliases(nodeShape.label)
+    TODO:
+    - Field docs.
+     */
 
-            var fields = schema.fields()
-
-            nodeShape.properties?.values?.forEach { p ->
-                fields = if (p.datatype != null) {
-                    fields.name(p.path.localName).type(primitivesMapping[p.datatype.localName]).noDefault()
-
-                } else if (p.node != null && p.node !in ancestorsPath) {
-                    fields.name(p.path.localName)
-                        .type(go(conn, p.node, constraintsGraph, ancestorsPath + p.node, *vocabularyGraphs))
-                        .noDefault()
-                } else {
-                    return fields.endRecord()
-                }
-
-            }
-            return fields.endRecord()
+    SPARQLQueries.getNodeShape(conn, nodeShapeIRI, constraintsGraph, *vocabularyGraphs).let { nodeShape ->
+        when {
+            nodeShape.`in`?.isNotEmpty() == true -> buildEnumSchema(nodeShape)
+            else -> buildRecordSchema(conn, nodeShape, constraintsGraph, ancestorsPath, *vocabularyGraphs)
         }
     }
-    return go(conn, nodeShapeIRI, constraintsGraph, listOf(nodeShapeIRI), *vocabularyGraphs)
-
-}
-
-
-//                    .name("id").type().stringType().noDefault()
-//                    .name("def").type().unionOf().nullType().and().intType().endUnion().noDefault()
-//                .endRecord()
 
 fun buildSchemas(conn: SailRepositoryConnection, directory: File): MutableList<Schema> {
     val schemas = mutableListOf<Schema>()
@@ -90,7 +100,7 @@ fun buildSchemas(conn: SailRepositoryConnection, directory: File): MutableList<S
         val rootObjectIRI = SPARQLQueries.getRootObjectIRI(conn, constraintsFileURL)
             ?: throw NoRootObjectException("No root object found in constraints file: $constraintsFileURL")
 
-        val schema = buildSchema(conn, rootObjectIRI, constraintsFileURL, *vocabularyFileURLs)
+        val schema = buildSchema(conn, rootObjectIRI, constraintsFileURL, listOf(rootObjectIRI), *vocabularyFileURLs)
         schemas.add(schema)
     }
 
