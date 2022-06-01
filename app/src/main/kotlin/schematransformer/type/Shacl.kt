@@ -1,7 +1,6 @@
 package schematransformer.type
 
 import org.eclipse.rdf4j.model.IRI
-import org.eclipse.rdf4j.model.Value
 
 data class PropertyShape(
     val path: IRI,
@@ -19,10 +18,5 @@ data class NodeShape(
     val label: String?,
     val comment: String?,
     val properties: Map<String, PropertyShape>?,
-    val `in`: List<IRI?>?,
+    val `in`: List<IRI>?,
 )
-
-/* Voor Ritger.
-    - Al die optionality, nested zelfs (zoals `in`). Is dit echt normaal of doe ik iets onhandig?
-    - Geen mogelijkheid om te re-usen van properties
- */
