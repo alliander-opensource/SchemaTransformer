@@ -27,6 +27,7 @@ shape:AShape
 
 shape:BShape
     a sh:NodeShape ;
+    rdfs:comment "RootObject" ;
     sh:targetClass vocab:B ;
     sh:and (shape:AShape :EShape) ;
     sh:property shape:idShape ;
@@ -51,7 +52,6 @@ shape:BShape
 shape:CShape
     a sh:NodeShape ;
     sh:targetClass vocab:C ;
-    rdfs:comment "RootObject" ;
     sh:in (
           vocab:individual1
           vocab:individual2

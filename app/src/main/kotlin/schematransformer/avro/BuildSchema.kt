@@ -14,6 +14,7 @@ import java.io.File
 val primitivesMapping = mapOf(
     "string" to "string",
     "boolean" to "boolean",
+    "int" to "int",
     "decimal" to "bytes",
     "float" to "float",
     "double" to "double",
@@ -31,49 +32,50 @@ fun buildSchema(
     constraintsGraph: IRI,
     vararg vocabularyGraphs: IRI
 ): Schema {
-    /* TODO.
-    *  This is where the AVRO schema will be built.
-    *  We will be:
-    *    [ ] using the official `SchemaBuilder`
-    *    [ ] using recursion, and paying mind to circular dependencies
-    *    [ ] transforming cardinalities to AVRO compatible ones
-    *    [ ] enums: sh:in; type = enum; symbols = ... (CShape is an example)
-    */
+    fun go(
+        conn: SailRepositoryConnection,
+        nodeShapeIRI: IRI,
+        constraintsGraph: IRI,
+        ancestorsPath: List<IRI> = listOf(),
+        vararg vocabularyGraphs: IRI
+    ): Schema {
+        val nodeShape =
+            SPARQLQueries.getNodeShape(conn, nodeShapeIRI, constraintsGraph, *vocabularyGraphs)
 
-    val nodeShape =
-        SPARQLQueries.getNodeShape(conn, nodeShapeIRI, constraintsGraph, *vocabularyGraphs)
+        if (nodeShape.`in` != null && nodeShape.`in`.isNotEmpty()) {
+            return SchemaBuilder.enumeration(nodeShape.targetClass.localName)
+                .symbols(*nodeShape.`in`.map { it.localName }.toTypedArray())
+        } else {
+            val schema = SchemaBuilder.record(nodeShape.targetClass.localName)
+                .doc(nodeShape.comment)
+                .aliases(nodeShape.label)
 
-    if (nodeShape.`in` != null) {
-        return SchemaBuilder.enumeration(nodeShape.targetClass.localName)
-            .symbols(*nodeShape.`in`.map { it.localName }.toTypedArray())
-    } else {
-        val schema = SchemaBuilder.record(nodeShape.targetClass.localName)
-            .doc(nodeShape.comment)
-            .aliases(nodeShape.label)
+            var fields = schema.fields()
 
-        var fields = schema.fields()
+            nodeShape.properties?.values?.forEach { p ->
+                fields = if (p.datatype != null) {
+                    fields.name(p.path.localName).type(primitivesMapping[p.datatype.localName]).noDefault()
 
-        nodeShape.properties?.values?.forEach { p ->
-            fields = if (p.datatype != null) {
-                fields.name(p.path.localName).type(primitivesMapping[p.datatype.localName]).noDefault()
+                } else if (p.node != null && p.node !in ancestorsPath) {
+                    fields.name(p.path.localName)
+                        .type(go(conn, p.node, constraintsGraph, ancestorsPath + p.node, *vocabularyGraphs))
+                        .noDefault()
+                } else {
+                    return fields.endRecord()
+                }
 
-            } else if (p.node != null) {
-                fields.name(p.path.localName).type(buildSchema(conn, p.node, constraintsGraph, *vocabularyGraphs))
-                    .noDefault()
-            } else {
-                TODO() // Exception?
             }
-
+            return fields.endRecord()
         }
-        return fields.endRecord()
     }
+    return go(conn, nodeShapeIRI, constraintsGraph, listOf(nodeShapeIRI), *vocabularyGraphs)
+
+}
 
 
 //                    .name("id").type().stringType().noDefault()
 //                    .name("def").type().unionOf().nullType().and().intType().endUnion().noDefault()
 //                .endRecord()
-
-}
 
 fun buildSchemas(conn: SailRepositoryConnection, directory: File): MutableList<Schema> {
     val schemas = mutableListOf<Schema>()
