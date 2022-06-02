@@ -13,8 +13,7 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @base <http://www.w3.org/2002/07/owl#> .
 
-[ rdf:type owl:Ontology
- ] .
+[ rdf:type owl:Ontology ] .
 
 #################################################################
 #    Annotation properties
@@ -70,7 +69,6 @@ prof:ResourceDescriptor rdf:type owl:Class .
 :Profile rdf:type owl:NamedIndividual ,
                   prof:Profile ;
          prof:hasResource :ConstraintsResource ,
-#                          :ConstraintsResource2 ,
                           :VocabularyResource .
 
 
