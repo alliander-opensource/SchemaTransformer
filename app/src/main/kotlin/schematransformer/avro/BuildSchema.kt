@@ -11,7 +11,6 @@ import schematransformer.util.getFileIRI
 import schematransformer.vocabulary.DXPROFILE
 import java.io.File
 import kotlin.math.min
-import kotlin.math.max
 
 
 val primitivesMapping = mapOf(
@@ -71,12 +70,14 @@ fun buildRecordSchema(
             p.datatype != null ->
                 SchemaBuilder.builder().type(primitivesMapping[p.datatype.localName]).let { schema ->
                     fields.name(p.path.localName)
+                        .doc(p.comment)
                         .type(transformCardinality(schema, normalizedMinCount, normalizedMaxCount))
                         .noDefault()
                 }
             p.node != null ->
                 if (p.node !in ancestorsPath)
                     fields.name(p.path.localName)
+                        .doc(p.comment)
                         .type(
                             transformCardinality(
                                 buildSchema(conn, p.node, constraintsGraph, ancestorsPath + p.node, *vocabularyGraphs),
@@ -106,10 +107,11 @@ fun buildSchema(
     2. More functions I think.
     3. Repetition of fields.endRecord
     4. All the mutation and imperative code: is there a different way?
+    5. Repetition of field building
 
     TODO:
-    - SOC: Separate out the DB stuff. Should be possible.
     - Field docs.
+    - SOC: Separate out the DB stuff. Should be possible.
      */
 
     SPARQLQueries.getNodeShape(conn, nodeShapeIRI, constraintsGraph, *vocabularyGraphs).let { nodeShape ->
