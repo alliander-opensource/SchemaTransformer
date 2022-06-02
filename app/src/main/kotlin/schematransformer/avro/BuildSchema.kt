@@ -10,6 +10,8 @@ import schematransformer.type.NodeShape
 import schematransformer.util.getFileIRI
 import schematransformer.vocabulary.DXPROFILE
 import java.io.File
+import kotlin.math.min
+import kotlin.math.max
 
 
 val primitivesMapping = mapOf(
@@ -29,8 +31,23 @@ val primitivesMapping = mapOf(
 fun buildEnumSchema(nodeShape: NodeShape): Schema =
     SchemaBuilder.enumeration(nodeShape.targetClass.localName)
         .symbols(
-            *nodeShape.`in`?.map { it.localName }?.toTypedArray() ?: throw IllegalStateException()
+            *nodeShape.`in`?.map { it.localName }?.toTypedArray()
+                ?: throw IllegalStateException("No enum symbols found.")
         )
+
+fun transformCardinality(schema: Schema, minCount: Int, maxCount: Int): Schema {
+    val baseSchema = SchemaBuilder.builder().type(schema);
+
+    SchemaBuilder.builder().let { builder ->
+        return when (minCount to maxCount) {
+            1 to 1 -> baseSchema
+            0 to 1 -> builder.unionOf().nullType().and().type(schema).endUnion();
+            0 to Int.MAX_VALUE -> builder.unionOf().nullType().and().array().items().type(schema).endUnion()
+            1 to Int.MAX_VALUE -> builder.array().items(schema)
+            else -> throw IllegalStateException("Unsupported cardinality.")
+        }
+    }
+}
 
 fun buildRecordSchema(
     conn: SailRepositoryConnection,
@@ -45,22 +62,34 @@ fun buildRecordSchema(
 
     var fields = schema.fields()
 
+    // Field generation.
     nodeShape.properties?.values?.forEach { p ->
-        fields = if (p.datatype != null) {
-            fields.name(p.path.localName).type(primitivesMapping[p.datatype.localName]).noDefault()
+        val normalizedMinCount = min(p.minCount ?: 0, 1)
+        val normalizedMaxCount = with(p.maxCount ?: Int.MAX_VALUE) { if (this > 1) Int.MAX_VALUE else this }
 
-        } else if (p.node != null && p.node !in ancestorsPath) {
-            fields.name(p.path.localName)
-                .type(buildSchema(conn, p.node, constraintsGraph, ancestorsPath + p.node, *vocabularyGraphs))
-                .noDefault()
-        } else {
-            return fields.endRecord()
+        fields = when {
+            p.datatype != null ->
+                fields.name(p.path.localName)
+                    .type(primitivesMapping[p.datatype.localName])
+                    .noDefault()
+            p.node != null ->
+                if (p.node !in ancestorsPath)
+                    fields.name(p.path.localName)
+                        .type(
+                            transformCardinality(
+                                buildSchema(conn, p.node, constraintsGraph, ancestorsPath + p.node, *vocabularyGraphs),
+                                normalizedMinCount,
+                                normalizedMaxCount
+                            )
+                        )
+                        .noDefault()
+                else fields
+            else -> throw IllegalStateException("Property shape must contain either sh:node or sh:datatype.")
         }
-
     }
+
     return fields.endRecord()
 }
-
 
 fun buildSchema(
     conn: SailRepositoryConnection,
@@ -77,6 +106,7 @@ fun buildSchema(
     4. All the mutation and imperative code: is there a different way?
 
     TODO:
+    - SOC: Separate out the DB stuff. Should be possible.
     - Field docs.
      */
 
