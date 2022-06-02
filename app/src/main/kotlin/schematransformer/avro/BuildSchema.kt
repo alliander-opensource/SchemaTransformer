@@ -5,7 +5,10 @@ import org.apache.avro.SchemaBuilder
 import org.apache.avro.SchemaBuilder.FieldAssembler
 import org.eclipse.rdf4j.model.IRI
 import org.eclipse.rdf4j.repository.sail.SailRepositoryConnection
+import schematransformer.EnumSymbolsNotFoundException
+import schematransformer.IncompatiblePropertyShapeException
 import schematransformer.NoRootObjectException
+import schematransformer.UnsupportedCardinalityException
 import schematransformer.sparql.SPARQLQueries
 import schematransformer.type.NodeShape
 import schematransformer.type.PropertyShape
@@ -33,7 +36,7 @@ fun buildEnumSchema(nodeShape: NodeShape): Schema =
     SchemaBuilder.enumeration(nodeShape.targetClass.localName)
         .symbols(
             *nodeShape.`in`?.map { it.localName }?.toTypedArray()
-                ?: throw IllegalStateException("No enum symbols found.")
+                ?: throw EnumSymbolsNotFoundException()
         )
 
 fun transformCardinality(schema: Schema, minCount: Int, maxCount: Int): Schema {
@@ -45,7 +48,7 @@ fun transformCardinality(schema: Schema, minCount: Int, maxCount: Int): Schema {
             0 to 1 -> builder.unionOf().nullType().and().type(schema).endUnion();
             0 to Int.MAX_VALUE -> builder.unionOf().nullType().and().array().items().type(schema).endUnion()
             1 to Int.MAX_VALUE -> builder.array().items(schema)
-            else -> throw IllegalStateException("Unsupported cardinality.")
+            else -> throw UnsupportedCardinalityException()
         }
     }
 }
@@ -88,7 +91,7 @@ fun buildRecordSchema(
                 ancestorsPath + p.node,
                 *vocabularyGraphs
             ) else null
-            else -> throw IllegalStateException("Property shape must contain either sh:node or sh:datatype.")
+            else -> throw IncompatiblePropertyShapeException()
         }?.let { schema ->
             buildRecordField(p, fields, transformCardinality(schema, normalizedMinCount, normalizedMaxCount))
         } ?: fields
