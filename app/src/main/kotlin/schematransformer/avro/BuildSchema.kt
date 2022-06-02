@@ -2,11 +2,13 @@ package schematransformer.avro
 
 import org.apache.avro.Schema
 import org.apache.avro.SchemaBuilder
+import org.apache.avro.SchemaBuilder.FieldAssembler
 import org.eclipse.rdf4j.model.IRI
 import org.eclipse.rdf4j.repository.sail.SailRepositoryConnection
 import schematransformer.NoRootObjectException
 import schematransformer.sparql.SPARQLQueries
 import schematransformer.type.NodeShape
+import schematransformer.type.PropertyShape
 import schematransformer.util.getFileIRI
 import schematransformer.vocabulary.DXPROFILE
 import java.io.File
@@ -48,6 +50,17 @@ fun transformCardinality(schema: Schema, minCount: Int, maxCount: Int): Schema {
     }
 }
 
+fun buildRecordField(
+    property: PropertyShape,
+    fields: SchemaBuilder.FieldAssembler<Schema>,
+    schema: Schema
+): SchemaBuilder.FieldAssembler<Schema> =
+    fields.name(property.path.localName)
+        .doc(property.comment)
+        .type(schema)
+        .noDefault()
+
+
 fun buildRecordSchema(
     conn: SailRepositoryConnection,
     nodeShape: NodeShape,
@@ -67,28 +80,18 @@ fun buildRecordSchema(
         val normalizedMaxCount = with(p.maxCount ?: Int.MAX_VALUE) { if (this > 1) Int.MAX_VALUE else this }
 
         fields = when {
-            p.datatype != null ->
-                SchemaBuilder.builder().type(primitivesMapping[p.datatype.localName]).let { schema ->
-                    fields.name(p.path.localName)
-                        .doc(p.comment)
-                        .type(transformCardinality(schema, normalizedMinCount, normalizedMaxCount))
-                        .noDefault()
-                }
-            p.node != null ->
-                if (p.node !in ancestorsPath)
-                    fields.name(p.path.localName)
-                        .doc(p.comment)
-                        .type(
-                            transformCardinality(
-                                buildSchema(conn, p.node, constraintsGraph, ancestorsPath + p.node, *vocabularyGraphs),
-                                normalizedMinCount,
-                                normalizedMaxCount
-                            )
-                        )
-                        .noDefault()
-                else fields
+            p.datatype != null -> SchemaBuilder.builder().type(primitivesMapping[p.datatype.localName])
+            p.node != null -> if (p.node !in ancestorsPath) buildSchema(
+                conn,
+                p.node,
+                constraintsGraph,
+                ancestorsPath + p.node,
+                *vocabularyGraphs
+            ) else null
             else -> throw IllegalStateException("Property shape must contain either sh:node or sh:datatype.")
-        }
+        }?.let { schema ->
+            buildRecordField(p, fields, transformCardinality(schema, normalizedMinCount, normalizedMaxCount))
+        } ?: fields
     }
 
     return fields.endRecord()
@@ -134,7 +137,8 @@ fun buildSchemas(conn: SailRepositoryConnection, directory: File): MutableList<S
         val rootObjectIRI = SPARQLQueries.getRootObjectIRI(conn, constraintsFileURL)
             ?: throw NoRootObjectException("No root object found in constraints file: $constraintsFileURL")
 
-        val schema = buildSchema(conn, rootObjectIRI, constraintsFileURL, listOf(rootObjectIRI), *vocabularyFileURLs)
+        val schema =
+            buildSchema(conn, rootObjectIRI, constraintsFileURL, listOf(rootObjectIRI), *vocabularyFileURLs)
         schemas.add(schema)
     }
 
