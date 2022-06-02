@@ -40,10 +40,13 @@ fun buildEnumSchema(nodeShape: NodeShape): Schema =
         )
 
 fun transformCardinality(schema: Schema, minCount: Int, maxCount: Int): Schema {
-    val baseSchema = SchemaBuilder.builder().type(schema);
+    val baseSchema = SchemaBuilder.builder().type(schema)
+
+    val normalizedMinCount = min(minCount, 1)
+    val normalizedMaxCount = if (maxCount > 1) Int.MAX_VALUE else maxCount
 
     SchemaBuilder.builder().let { builder ->
-        return when (minCount to maxCount) {
+        return when (normalizedMinCount to normalizedMaxCount) {
             1 to 1 -> baseSchema
             0 to 1 -> builder.unionOf().nullType().and().type(schema).endUnion();
             0 to Int.MAX_VALUE -> builder.unionOf().nullType().and().array().items().type(schema).endUnion()
@@ -79,21 +82,24 @@ fun buildRecordSchema(
 
     // Field generation.
     nodeShape.properties?.values?.forEach { p ->
-        val normalizedMinCount = min(p.minCount ?: 0, 1)
-        val normalizedMaxCount = with(p.maxCount ?: Int.MAX_VALUE) { if (this > 1) Int.MAX_VALUE else this }
-
         fields = when {
             p.datatype != null -> SchemaBuilder.builder().type(xsdToAvro[p.datatype.localName])
-            p.node != null -> if (p.node !in ancestorsPath) buildSchema(
-                conn,
-                p.node,
-                constraintsGraph,
-                ancestorsPath + p.node,
-                *vocabularyGraphs
-            ) else null
+            p.node != null ->
+                if (p.node !in ancestorsPath) buildSchema(
+                    conn,
+                    p.node,
+                    constraintsGraph,
+                    ancestorsPath + p.node,
+                    *vocabularyGraphs
+                ) else
+                    null
             else -> throw IncompatiblePropertyShapeException()
         }?.let { schema ->
-            buildRecordField(p, fields, transformCardinality(schema, normalizedMinCount, normalizedMaxCount))
+            buildRecordField(
+                p,
+                fields,
+                transformCardinality(schema, p.minCount ?: 0, p.maxCount ?: Int.MAX_VALUE)
+            )
         } ?: fields
     }
 
