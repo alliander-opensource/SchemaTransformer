@@ -15,7 +15,7 @@ import java.io.File
 import kotlin.math.min
 
 
-val primitivesMapping = mapOf(
+val xsdToAvro = mapOf(
     "string" to "string",
     "boolean" to "boolean",
     "int" to "int",
@@ -52,9 +52,9 @@ fun transformCardinality(schema: Schema, minCount: Int, maxCount: Int): Schema {
 
 fun buildRecordField(
     property: PropertyShape,
-    fields: SchemaBuilder.FieldAssembler<Schema>,
+    fields: FieldAssembler<Schema>,
     schema: Schema
-): SchemaBuilder.FieldAssembler<Schema> =
+): FieldAssembler<Schema> =
     fields.name(property.path.localName)
         .doc(property.comment)
         .type(schema)
@@ -80,7 +80,7 @@ fun buildRecordSchema(
         val normalizedMaxCount = with(p.maxCount ?: Int.MAX_VALUE) { if (this > 1) Int.MAX_VALUE else this }
 
         fields = when {
-            p.datatype != null -> SchemaBuilder.builder().type(primitivesMapping[p.datatype.localName])
+            p.datatype != null -> SchemaBuilder.builder().type(xsdToAvro[p.datatype.localName])
             p.node != null -> if (p.node !in ancestorsPath) buildSchema(
                 conn,
                 p.node,
@@ -104,19 +104,6 @@ fun buildSchema(
     ancestorsPath: List<IRI> = listOf(),
     vararg vocabularyGraphs: IRI
 ): Schema =
-    /*
-    Clean up:
-    1. More `when` expressions perhaps?
-    2. More functions I think.
-    3. Repetition of fields.endRecord
-    4. All the mutation and imperative code: is there a different way?
-    5. Repetition of field building
-
-    TODO:
-    - Field docs.
-    - SOC: Separate out the DB stuff. Should be possible.
-     */
-
     SPARQLQueries.getNodeShape(conn, nodeShapeIRI, constraintsGraph, *vocabularyGraphs).let { nodeShape ->
         when {
             nodeShape.`in`?.isNotEmpty() == true -> buildEnumSchema(nodeShape)
