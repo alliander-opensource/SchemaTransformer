@@ -18,7 +18,7 @@ shape:AShape
           sh:minCount 1;
           sh:maxCount 1;
       ] ;
-    sh:property[
+    sh:property [
           sh:path vocab:abc ;
           sh:datatype xsd:dateTime ;
           sh:minCount 0;
@@ -70,7 +70,7 @@ shape:DShape
           sh:maxCount 1 ;
       ];
     sh:property [
-          sh:path vocab:fromDtoB ;
+          sh:path vocab:FromDtoB ;
           sh:node shape:BShape ;
           sh:minCount 1 ;
           sh:maxCount 3 ;
@@ -78,9 +78,9 @@ shape:DShape
 
 shape:EShape
     a sh:NodeShape ;
-    sh:TargetClass vocab:E ;
+    sh:targetClass vocab:E ;
     sh:property [
-          sh:path vocab:fromEtoC ;
+          sh:path vocab:FromEtoC ;
           sh:node shape:CShape ;
           sh:minCount 0 ;
           sh:maxCount 1 ;
