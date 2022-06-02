@@ -69,9 +69,11 @@ fun buildRecordSchema(
 
         fields = when {
             p.datatype != null ->
-                fields.name(p.path.localName)
-                    .type(primitivesMapping[p.datatype.localName])
-                    .noDefault()
+                SchemaBuilder.builder().type(primitivesMapping[p.datatype.localName]).let { schema ->
+                    fields.name(p.path.localName)
+                        .type(transformCardinality(schema, normalizedMinCount, normalizedMaxCount))
+                        .noDefault()
+                }
             p.node != null ->
                 if (p.node !in ancestorsPath)
                     fields.name(p.path.localName)
