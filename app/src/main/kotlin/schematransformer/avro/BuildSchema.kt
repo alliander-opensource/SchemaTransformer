@@ -66,7 +66,6 @@ fun buildRecordField(
         .type(schema)
         .noDefault()
 
-
 fun buildRecordSchema(
     conn: SailRepositoryConnection,
     nodeShape: NodeShape,

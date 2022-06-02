@@ -72,15 +72,12 @@ object SPARQLQueries {
                     ?property sh:path ?propPath ;
                               sh:datatype|sh:node ?propRangeType .
                     BIND(EXISTS { ?property sh:node ?propRangeType } AS ?propIsNode)
-                    OPTIONAL {
-                    ?propPath rdfs:label|skos:prefLabel ?propLabel ;
-                              rdfs:comment|skos:definition ?propComment . }
-                    OPTIONAL {
-                    ?property sh:minCount ?propMinCount ;
-                              sh:maxCount ?propMaxCount .
-                    }
+                    OPTIONAL { ?propPath rdfs:label|skos:prefLabel ?propLabel . }
+                    OPTIONAL { ?propPath rdfs:comment|skos:definition ?propComment . }
+                    OPTIONAL { ?property sh:minCount ?propMinCount . }
+                    OPTIONAL { ?property sh:maxCount ?propMaxCount . }
                 }
-        }
+            }
     """.trimIndent()
         ) {
             conn.prepareTupleQuery(this).evaluate()
