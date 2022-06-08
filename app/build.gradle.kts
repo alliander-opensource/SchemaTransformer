@@ -57,6 +57,8 @@ dependencies {
     testImplementation("io.kotest:kotest-runner-junit5-jvm:5.1.0")
     testImplementation("io.kotest:kotest-assertions-core-jvm:5.1.0")
     // testImplementation("io.kotest:kotest-property-jvm:5.1.0")
+    implementation("info.picocli:picocli:4.6.3")
+
 
     // Arrow.
 //    implementation(platform("io.arrow-kt:arrow-stack:1.0.1"))
@@ -68,7 +70,7 @@ dependencies {
 
 application {
     // Define the main class for the application.
-    mainClass.set("SchemaTransformer.AppKt")
+    mainClass.set("schematransformer.AppKt")
 }
 
 tasks.withType<Test> {
