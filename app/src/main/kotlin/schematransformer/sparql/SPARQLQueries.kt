@@ -3,6 +3,7 @@ package schematransformer.sparql
 import org.eclipse.rdf4j.model.IRI
 import org.eclipse.rdf4j.model.Value
 import org.eclipse.rdf4j.model.impl.BooleanLiteral
+import org.eclipse.rdf4j.model.vocabulary.RDFS
 import org.eclipse.rdf4j.model.vocabulary.SHACL
 import org.eclipse.rdf4j.model.vocabulary.SKOS
 import org.eclipse.rdf4j.repository.sail.SailRepositoryConnection
@@ -19,7 +20,7 @@ object SPARQLQueries {
     private fun from(vararg context: IRI): String = context.joinToString("\n") { "FROM <$it>" }
 
     fun getProfileResources(conn: SailRepositoryConnection, vararg context: IRI): Map<Value, List<Value>> {
-        val dataset = Dataset().from(*context)
+        val contexts = Dataset().from(*context)
         val role = SparqlBuilder.`var`("role")
         val artifact = SparqlBuilder.`var`("artifact")
         val resource = SparqlBuilder.`var`("resource")
@@ -28,32 +29,35 @@ object SPARQLQueries {
         val q = Queries.SELECT(role, artifact)
             .prefix(SHACL.NS)
             .prefix(DXPROFILE.NS)
-            .from(dataset)
+            .from(contexts)
             .where(
                 prof.isA(DXPROFILE.PROFILE)
                     .andHas(DXPROFILE.HASRESOURCE, resource)
-                    .and(resource.has(DXPROFILE.HASROLE, role).andHas(DXPROFILE.HASARTIFACT, artifact))
+                    .and(resource.has(DXPROFILE.HASROLE, role)
+                        .andHas(DXPROFILE.HASARTIFACT, artifact))
             )
 
-        println(q.queryString)
-        return conn.prepareTupleQuery(q.queryString).evaluate()
+        return conn.prepareTupleQuery(q.queryString).evaluate()  // Improve.
             .groupBy(
                 { it.getValue("role") },
                 { it.getValue("artifact") })
     }
 
-    fun getRootObjectIRI(conn: SailRepositoryConnection, vararg context: IRI): IRI? =
-        with(
-            """
-            PREFIX ${SHACL.PREFIX}: <${SHACL.NAMESPACE}>
-            SELECT ?root
-            ${from(*context)}
-            WHERE {
-                ?root a sh:NodeShape ;
-                      rdfs:comment "RootObject" .
-            }
-        """.trimIndent()
-        ) { conn.prepareTupleQuery(this).evaluate().firstOrNull()?.getValue("root") as IRI? }
+    fun getRootObjectIRI(conn: SailRepositoryConnection, vararg context: IRI): IRI? {
+        val contexts = Dataset().from(*context)
+        val root = SparqlBuilder.`var`("root")
+
+        val q = Queries.SELECT(root)
+            .prefix(SHACL.NS)
+            .from(contexts)
+            .where(
+                root
+                    .isA(SHACL.NODE_SHAPE)
+                    .andHas(RDFS.COMMENT, "RootObject")
+            )
+
+        return conn.prepareTupleQuery(q.queryString).evaluate().firstOrNull()?.getValue("root") as IRI?
+    }
 
     fun getNodeShape(
         conn: SailRepositoryConnection,
