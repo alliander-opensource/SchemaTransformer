@@ -4,8 +4,6 @@ import org.apache.avro.Schema
 import org.apache.avro.SchemaBuilder
 import org.apache.avro.SchemaBuilder.FieldAssembler
 import org.eclipse.rdf4j.model.IRI
-//import org.eclipse.rdf4j.model.base.CoreDatatype.XSD
-import org.eclipse.rdf4j.model.vocabulary.XSD
 import org.eclipse.rdf4j.repository.sail.SailRepositoryConnection
 import schematransformer.EnumSymbolsNotFoundException
 import schematransformer.IncompatiblePropertyShapeException
@@ -14,24 +12,12 @@ import schematransformer.UnsupportedCardinalityException
 import schematransformer.sparql.SPARQLQueries
 import schematransformer.type.NodeShape
 import schematransformer.type.PropertyShape
+import schematransformer.type.XsdToAvro
 import schematransformer.util.getFileIRI
 import schematransformer.vocabulary.DXPROFILE
 import java.io.File
 import kotlin.math.min
 
-val xsdToAvro = mapOf<IRI, String>(
-    XSD.STRING to "string",
-    XSD.BOOLEAN to "boolean",
-    XSD.INT to "int",
-    XSD.DECIMAL to "bytes",
-    XSD.FLOAT to "float",
-    XSD.DOUBLE to "double",
-    XSD.DURATION to "fixed",
-    XSD.DATETIME to "string",
-    XSD.DATE to "string",
-    XSD.TIME to "string",
-    XSD.ANYURI to "string",
-)
 
 fun buildEnumSchema(nodeShape: NodeShape): Schema =
     SchemaBuilder.enumeration(nodeShape.targetClass.localName)
@@ -83,7 +69,7 @@ fun buildRecordSchema(
     // Field generation.
     nodeShape.properties?.values?.forEach { p ->
         fields = when {
-            p.datatype != null -> SchemaBuilder.builder().type(xsdToAvro[p.datatype])
+            p.datatype != null -> SchemaBuilder.builder().type(Schema.create(XsdToAvro[p.datatype]))
             p.node != null ->
                 if (p.node !in ancestorsPath) buildSchema(
                     conn,
