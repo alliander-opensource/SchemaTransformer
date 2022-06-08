@@ -18,7 +18,6 @@ import schematransformer.vocabulary.DXPROFILE
 import java.io.File
 import kotlin.math.min
 
-
 fun buildEnumSchema(nodeShape: NodeShape): Schema =
     SchemaBuilder.enumeration(nodeShape.targetClass.localName)
         .symbols(
