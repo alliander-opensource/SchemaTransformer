@@ -7,6 +7,10 @@ import org.eclipse.rdf4j.model.vocabulary.SHACL
 import org.eclipse.rdf4j.model.vocabulary.SKOS
 import org.eclipse.rdf4j.repository.sail.SailRepositoryConnection
 import org.eclipse.rdf4j.sail.memory.model.IntegerMemLiteral
+import org.eclipse.rdf4j.sparqlbuilder.core.Dataset
+import org.eclipse.rdf4j.sparqlbuilder.core.Prefix
+import org.eclipse.rdf4j.sparqlbuilder.core.SparqlBuilder
+import org.eclipse.rdf4j.sparqlbuilder.core.query.Queries
 import schematransformer.type.NodeShape
 import schematransformer.type.PropertyShape
 import schematransformer.vocabulary.DXPROFILE
@@ -14,23 +18,29 @@ import schematransformer.vocabulary.DXPROFILE
 object SPARQLQueries {
     private fun from(vararg context: IRI): String = context.joinToString("\n") { "FROM <$it>" }
 
-    fun getProfileResources(conn: SailRepositoryConnection, vararg context: IRI): Map<Value, List<Value>> =
-        with(
-            """
-            PREFIX ${DXPROFILE.PREFIX}: <${DXPROFILE.NAMESPACE}>
-            SELECT ?role ?artifact
-            ${from(*context)}
-            WHERE {
-                ?prof rdf:type prof:Profile ;
-                      prof:hasResource ?resource .
-                      
-                ?resource prof:hasRole ?role ;
-                          prof:hasArtifact ?artifact .
-            }""".trimIndent()
-        ) {
-            conn.prepareTupleQuery(this).evaluate()
-                .groupBy({ it.getValue("role") }, { it.getValue("artifact") })
-        }
+    fun getProfileResources(conn: SailRepositoryConnection, vararg context: IRI): Map<Value, List<Value>> {
+        val dataset = Dataset().from(*context)
+        val role = SparqlBuilder.`var`("role")
+        val artifact = SparqlBuilder.`var`("artifact")
+        val resource = SparqlBuilder.`var`("resource")
+        val prof = SparqlBuilder.`var`("prof")
+
+        val q = Queries.SELECT(role, artifact)
+            .prefix(SHACL.NS)
+            .prefix(DXPROFILE.NS)
+            .from(dataset)
+            .where(
+                prof.isA(DXPROFILE.PROFILE)
+                    .andHas(DXPROFILE.HASRESOURCE, resource)
+                    .and(resource.has(DXPROFILE.HASROLE, role).andHas(DXPROFILE.HASARTIFACT, artifact))
+            )
+
+        println(q.queryString)
+        return conn.prepareTupleQuery(q.queryString).evaluate()
+            .groupBy(
+                { it.getValue("role") },
+                { it.getValue("artifact") })
+    }
 
     fun getRootObjectIRI(conn: SailRepositoryConnection, vararg context: IRI): IRI? =
         with(
