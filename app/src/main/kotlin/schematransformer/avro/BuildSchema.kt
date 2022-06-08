@@ -4,6 +4,8 @@ import org.apache.avro.Schema
 import org.apache.avro.SchemaBuilder
 import org.apache.avro.SchemaBuilder.FieldAssembler
 import org.eclipse.rdf4j.model.IRI
+//import org.eclipse.rdf4j.model.base.CoreDatatype.XSD
+import org.eclipse.rdf4j.model.vocabulary.XSD
 import org.eclipse.rdf4j.repository.sail.SailRepositoryConnection
 import schematransformer.EnumSymbolsNotFoundException
 import schematransformer.IncompatiblePropertyShapeException
@@ -17,19 +19,18 @@ import schematransformer.vocabulary.DXPROFILE
 import java.io.File
 import kotlin.math.min
 
-
-val xsdToAvro = mapOf(
-    "string" to "string",
-    "boolean" to "boolean",
-    "int" to "int",
-    "decimal" to "bytes",
-    "float" to "float",
-    "double" to "double",
-    "duration" to "fixed",
-    "dateTime" to "string",
-    "date" to "string",
-    "time" to "string",
-    "anyURI" to "string",
+val xsdToAvro = mapOf<IRI, String>(
+    XSD.STRING to "string",
+    XSD.BOOLEAN to "boolean",
+    XSD.INT to "int",
+    XSD.DECIMAL to "bytes",
+    XSD.FLOAT to "float",
+    XSD.DOUBLE to "double",
+    XSD.DURATION to "fixed",
+    XSD.DATETIME to "string",
+    XSD.DATE to "string",
+    XSD.TIME to "string",
+    XSD.ANYURI to "string",
 )
 
 fun buildEnumSchema(nodeShape: NodeShape): Schema =
@@ -48,7 +49,7 @@ fun transformCardinality(schema: Schema, minCount: Int, maxCount: Int): Schema {
     SchemaBuilder.builder().let { builder ->
         return when (normalizedMinCount to normalizedMaxCount) {
             1 to 1 -> baseSchema
-            0 to 1 -> builder.unionOf().nullType().and().type(schema).endUnion();
+            0 to 1 -> builder.unionOf().nullType().and().type(schema).endUnion()
             0 to Int.MAX_VALUE -> builder.unionOf().nullType().and().array().items().type(schema).endUnion()
             1 to Int.MAX_VALUE -> builder.array().items(schema)
             else -> throw UnsupportedCardinalityException()
@@ -82,7 +83,7 @@ fun buildRecordSchema(
     // Field generation.
     nodeShape.properties?.values?.forEach { p ->
         fields = when {
-            p.datatype != null -> SchemaBuilder.builder().type(xsdToAvro[p.datatype.localName])
+            p.datatype != null -> SchemaBuilder.builder().type(xsdToAvro[p.datatype])
             p.node != null ->
                 if (p.node !in ancestorsPath) buildSchema(
                     conn,
