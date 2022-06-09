@@ -3,15 +3,19 @@ package schematransformer.sparql
 import org.eclipse.rdf4j.model.IRI
 import org.eclipse.rdf4j.model.Value
 import org.eclipse.rdf4j.model.impl.BooleanLiteral
+import org.eclipse.rdf4j.model.vocabulary.RDF
 import org.eclipse.rdf4j.model.vocabulary.RDFS
 import org.eclipse.rdf4j.model.vocabulary.SHACL
 import org.eclipse.rdf4j.model.vocabulary.SKOS
+import org.eclipse.rdf4j.sparqlbuilder.rdf.Iri
 import org.eclipse.rdf4j.repository.sail.SailRepositoryConnection
 import org.eclipse.rdf4j.sail.memory.model.IntegerMemLiteral
+import org.eclipse.rdf4j.sparqlbuilder.constraint.Expressions
 import org.eclipse.rdf4j.sparqlbuilder.core.Dataset
-import org.eclipse.rdf4j.sparqlbuilder.core.Prefix
 import org.eclipse.rdf4j.sparqlbuilder.core.SparqlBuilder
 import org.eclipse.rdf4j.sparqlbuilder.core.query.Queries
+import org.eclipse.rdf4j.sparqlbuilder.graphpattern.GraphPatterns
+import org.eclipse.rdf4j.sparqlbuilder.rdf.Rdf
 import schematransformer.type.NodeShape
 import schematransformer.type.PropertyShape
 import schematransformer.vocabulary.DXPROFILE
@@ -33,8 +37,10 @@ object SPARQLQueries {
             .where(
                 prof.isA(DXPROFILE.PROFILE)
                     .andHas(DXPROFILE.HASRESOURCE, resource)
-                    .and(resource.has(DXPROFILE.HASROLE, role)
-                        .andHas(DXPROFILE.HASARTIFACT, artifact))
+                    .and(
+                        resource.has(DXPROFILE.HASROLE, role)
+                            .andHas(DXPROFILE.HASARTIFACT, artifact)
+                    )
             )
 
         return conn.prepareTupleQuery(q.queryString).evaluate()  // Improve.
@@ -63,9 +69,84 @@ object SPARQLQueries {
         conn: SailRepositoryConnection,
         nodeShapeIRI: IRI,
         vararg context: IRI
-    ): NodeShape =
-        with(
-            """
+    ): NodeShape {
+        val contexts = Dataset().from(*context)
+        val targetClass = SparqlBuilder.`var`("targetClass")
+        val label = SparqlBuilder.`var`("label")
+        val comment = SparqlBuilder.`var`("comment")
+        val enum = SparqlBuilder.`var`("enum")
+        val property = SparqlBuilder.`var`("property")
+        val propPath = SparqlBuilder.`var`("propPath")
+        val propRangeType = SparqlBuilder.`var`("propRangeType")
+        val propIsNode = SparqlBuilder.`var`("propIsNode")
+        val propLabel = SparqlBuilder.`var`("propLabel")
+        val propComment = SparqlBuilder.`var`("propComment")
+        val propMinCount = SparqlBuilder.`var`("propMinCount")
+        val propMaxCount = SparqlBuilder.`var`("propMaxCount")
+        val nodeShape = Iri { nodeShapeIRI.stringValue() }
+
+        val q = Queries.SELECT()
+            .distinct()
+            .prefix(RDF.NS)
+            .prefix(RDFS.NS)
+            .prefix(SHACL.NS)
+            .prefix(SKOS.NS)
+            .from(contexts)
+            .where(
+                GraphPatterns.tp(nodeShapeIRI, SHACL.TARGET_CLASS, targetClass)
+                    .and(
+                        targetClass
+                            .has({ path -> path.pred(RDFS.LABEL).or(SKOS.PREF_LABEL) }, label)
+                            .andHas({ path -> path.pred(RDFS.COMMENT).or(SKOS.DEFINITION) }, comment)
+                    )
+                    .and(
+                        GraphPatterns.optional(
+                            nodeShape.has({ p ->
+                                p.pred(SHACL.IN)
+                                    .then(RDF.REST).zeroOrMore()
+                                    .then(RDF.FIRST)
+                                    .group().oneOrMore()
+                            }, enum)
+                        )
+                    ).and(
+                        GraphPatterns.optional(
+                            GraphPatterns.union(
+                                nodeShape.has(SHACL.PROPERTY, property),
+                                nodeShape.has(
+                                    { p ->
+                                        p.pred(SHACL.AND)
+                                            .then(RDF.REST).zeroOrMore()
+                                            .then(RDF.FIRST)
+                                            .then(SHACL.PROPERTY)
+                                            .group().oneOrMore()
+                                    },
+                                    property
+                                )
+                            ).and(
+                                property
+                                    .has(SHACL.PATH, propPath)
+                                    .andHas({ p -> p.pred(SHACL.DATATYPE).or(SHACL.NODE) }, propRangeType)
+                            ).and(
+                                /* WIP. */
+                                Expressions.bind(
+                                    Expressions.exists(
+                                        Rdf.literalOf(
+                                            !property.has(SHACL.NODE, propRangeType)
+                                                .filterExists()
+                                                .isEmpty()
+                                        )
+                                    ), propIsNode
+                                )
+                                /* WIP. */
+                            )
+                        )
+                    )
+            )
+
+        println(q.queryString)
+        println()
+        throw Exception()
+        val r = """
             PREFIX ${SHACL.PREFIX}: <${SHACL.NAMESPACE}>
             PREFIX ${SKOS.PREFIX}: <${SKOS.NAMESPACE}>
             SELECT DISTINCT *
@@ -93,34 +174,34 @@ object SPARQLQueries {
                 }
             }
     """.trimIndent()
-        ) {
-            conn.prepareTupleQuery(this).evaluate()
-                .map { row ->
-                    row
-                        .associate { it.name to it.value }
-                        .filter { it.value != null }
-                }.let { results ->
-                    NodeShape(targetClass = results[0]["targetClass"] as IRI,
-                        label = results[0]["label"]?.stringValue(),
-                        comment = results[0]["comment"]?.stringValue(),
-                        `in` = results.mapNotNull { it["enum"] as? IRI },
-                        properties = results.filter { it["property"] != null }.associate {
-                            it["property"]!!.stringValue() to PropertyShape(
-                                path = it["propPath"] as IRI,
-                                node = (if ((it["propIsNode"] as BooleanLiteral).booleanValue())
-                                    it["propRangeType"] as IRI
-                                else null),
-                                datatype = (if (!(it["propIsNode"] as BooleanLiteral).booleanValue())
-                                    it["propRangeType"] as IRI
-                                else null),
-                                label = it["propLabel"]?.stringValue(),
-                                comment = it["propComment"]?.stringValue(),
-                                minCount = (it["propMinCount"] as? IntegerMemLiteral)?.intValue(),
-                                maxCount = (it["propMaxCount"] as? IntegerMemLiteral)?.intValue(),
-                                `in` = null,
-                            )
-                        }
-                    )
-                }
-        }
+
+        return conn.prepareTupleQuery(q.queryString).evaluate()
+            .map { row ->
+                row
+                    .associate { it.name to it.value }
+                    .filter { it.value != null }
+            }.let { results ->
+                NodeShape(targetClass = results[0]["targetClass"] as IRI,
+                    label = results[0]["label"]?.stringValue(),
+                    comment = results[0]["comment"]?.stringValue(),
+                    `in` = results.mapNotNull { it["enum"] as? IRI },
+                    properties = results.filter { it["property"] != null }.associate {
+                        it["property"]!!.stringValue() to PropertyShape(
+                            path = it["propPath"] as IRI,
+                            node = (if ((it["propIsNode"] as BooleanLiteral).booleanValue())
+                                it["propRangeType"] as IRI
+                            else null),
+                            datatype = (if (!(it["propIsNode"] as BooleanLiteral).booleanValue())
+                                it["propRangeType"] as IRI
+                            else null),
+                            label = it["propLabel"]?.stringValue(),
+                            comment = it["propComment"]?.stringValue(),
+                            minCount = (it["propMinCount"] as? IntegerMemLiteral)?.intValue(),
+                            maxCount = (it["propMaxCount"] as? IntegerMemLiteral)?.intValue(),
+                            `in` = null,
+                        )
+                    }
+                )
+            }
+    }
 }
