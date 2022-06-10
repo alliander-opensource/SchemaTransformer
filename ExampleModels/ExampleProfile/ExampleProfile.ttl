@@ -11,41 +11,8 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix role: <http://www.w3.org/ns/dx/prof/role/> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
-@base <http://www.w3.org/2002/07/owl#> .
+@base <https://w3id.org/schematransform/ExampleProfile#> .
 
-[ rdf:type owl:Ontology
- ] .
-
-#################################################################
-#    Annotation properties
-#################################################################
-
-###  http://purl.org/dc/terms/Format
-dct:Format rdf:type owl:AnnotationProperty .
-
-
-###  http://www.w3.org/ns/dx/prof/hasArtifact
-prof:hasArtifact rdf:type owl:AnnotationProperty .
-
-
-###  http://www.w3.org/ns/dx/prof/hasResource
-prof:hasResource rdf:type owl:AnnotationProperty .
-
-
-###  http://www.w3.org/ns/dx/prof/hasRole
-prof:hasRole rdf:type owl:AnnotationProperty .
-
-
-#################################################################
-#    Classes
-#################################################################
-
-###  http://www.w3.org/ns/dx/prof/Profile
-prof:Profile rdf:type owl:Class .
-
-
-###  http://www.w3.org/ns/dx/prof/ResourceDescriptor
-prof:ResourceDescriptor rdf:type owl:Class .
 
 
 #################################################################
@@ -63,6 +30,7 @@ prof:ResourceDescriptor rdf:type owl:Class .
 ###  https://w3id.org/schematransform/ExampleProfile#Profile
 :Profile rdf:type owl:NamedIndividual ,
                   prof:Profile ;
+         rdfs:comment "This profile is test data to see whether de transformer works correctly."@en;          
          prof:hasResource :ConstraintsResource ,
                           :VocabularyResource .
 

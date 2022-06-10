@@ -1,21 +1,20 @@
 @startuml ConstraintDiagram
 
-class "sh:Shape"
+abstract class "sh:Shape"
 class "owl:Class"
+class "rdf:List" 
 class "sh:NodeShape" 
 class "rdfs:Datatype"
+class "rdf:Property" 
 class "sh:PropertyShape" {
     sh:minCount :  "xsd:integer"
     sh:maxCount :  "xsd:integer"
 }
-class "rdf:List" 
-class "rdf:Property" 
 abstract class "owl:Thing" { 
  rdfs:comment : "xsd:string" 
 }
 
 "owl:Thing" <|--  "rdf:Property"
-
 "owl:Thing" <|--  "rdfs:Datatype"
 "owl:Thing" <|--  "sh:Shape"
 "owl:Thing" <|--  "owl:Class"
@@ -24,10 +23,11 @@ abstract class "owl:Thing" {
 "sh:Shape" <|--   "sh:NodeShape"
 "sh:Shape" <|--   "sh:PropertyShape"
 
+"sh:Shape" -> "rdf:List" : "sh:in"
+"sh:NodeShape" --> "rdf:List" : "sh:and"
 "sh:NodeShape" --> "sh:PropertyShape" : "sh:property"
 "sh:NodeShape" --> "owl:Class" : "sh:targetClass"
 "sh:PropertyShape" -> "rdf:Property" : "sh:path"
-"sh:Shape" -> "rdf:List" : "sh:in"
 "sh:PropertyShape" -> "sh:NodeShape" : "sh:node"
 "sh:PropertyShape" -> "rdfs:Datatype" : "sh:datatype"
 
