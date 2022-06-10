@@ -1,4 +1,9 @@
-# Schema transformer
+# Schema Transformer
+
+## Contributing
+
+Please read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [CONTRIBUTING.md](CONTRIBUTING.md) for details on the process for submitting pull requests to us.
+
 
 
 ## Architecture of the generators

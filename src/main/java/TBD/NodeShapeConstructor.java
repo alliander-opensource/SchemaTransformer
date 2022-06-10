@@ -78,6 +78,7 @@ public class NodeShapeConstructor {
                     .enumeration(nodeEnumeration)
                     .doc(extractDoc(targetClass, vocabularies))
                     .aliases(extractAliases(targetClass, vocabularies))
+                    .subClassOf(extractSuperClass(targetClass, vocabularies))
                     .propertyList(propertyList)
                     .build());
         });
@@ -183,6 +184,20 @@ public class NodeShapeConstructor {
         return doc;
     }
 
+    private String extractSuperClass(String target, List<Model> vocabularies){
+        IRI subClassOfPredicate = Values.iri("http://www.w3.org/2000/01/rdf-schema#subClassOf");
+        String superClass = null;
+        for (Model vocabulary: vocabularies){
+            Model pNodeInfo = vocabulary.filter(Values.iri(target), null, null);
+            for (Statement st : pNodeInfo){
+                if (st.getPredicate().equals(subClassOfPredicate)){
+                    superClass = extractNameFromIRI(st.getObject().stringValue());
+                }
+            }
+        }
+        return superClass;
+    }
+
     private void enumerationToList(Resource firstNode, List<Model> constraints, List<String> resultList) {
         IRI enumFirstPredicate = Values.iri("http://www.w3.org/1999/02/22-rdf-syntax-ns#first");
         IRI enumRestPredicate = Values.iri("http://www.w3.org/1999/02/22-rdf-syntax-ns#rest");
@@ -191,7 +206,7 @@ public class NodeShapeConstructor {
             Model pEnumInfo = m.filter(firstNode, null, null);
             for (Statement st : pEnumInfo) {
                 if (st.getPredicate().equals(enumFirstPredicate)) {
-                    resultList.add(st.getObject().stringValue());
+                    resultList.add(extractNameFromIRI(st.getObject().stringValue()));
                 }
                 if (st.getObject().equals(enumEndObject)) {
                     return;
