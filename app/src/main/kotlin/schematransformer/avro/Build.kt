@@ -32,14 +32,14 @@ val xsdToAvro = mapOf(
     "anyURI" to "string",
 )
 
-fun buildEnumSchema(nodeShape: NodeShape): Schema =
+private fun buildEnumSchema(nodeShape: NodeShape): Schema =
     SchemaBuilder.enumeration(nodeShape.targetClass.localName)
         .symbols(
             *nodeShape.`in`?.map { it.localName }?.toTypedArray()
                 ?: throw EnumSymbolsNotFoundException()
         )
 
-fun transformCardinality(schema: Schema, minCount: Int, maxCount: Int): Schema {
+private fun transformCardinality(schema: Schema, minCount: Int, maxCount: Int): Schema {
     val baseSchema = SchemaBuilder.builder().type(schema)
 
     val normalizedMinCount = min(minCount, 1)
@@ -56,7 +56,7 @@ fun transformCardinality(schema: Schema, minCount: Int, maxCount: Int): Schema {
     }
 }
 
-fun buildRecordField(
+private fun buildRecordField(
     property: PropertyShape,
     fields: FieldAssembler<Schema>,
     schema: Schema
@@ -66,7 +66,7 @@ fun buildRecordField(
         .type(schema)
         .noDefault()
 
-fun buildRecordSchema(
+private fun buildRecordSchema(
     conn: SailRepositoryConnection,
     nodeShape: NodeShape,
     constraintsGraph: IRI,
@@ -84,7 +84,7 @@ fun buildRecordSchema(
         fields = when {
             p.datatype != null -> SchemaBuilder.builder().type(xsdToAvro[p.datatype.localName])
             p.node != null ->
-                if (p.node !in ancestorsPath) buildSchema(
+                if (p.node !in ancestorsPath) build(
                     conn,
                     p.node,
                     constraintsGraph,
@@ -105,7 +105,7 @@ fun buildRecordSchema(
     return fields.endRecord()
 }
 
-fun buildSchema(
+fun build(
     conn: SailRepositoryConnection,
     nodeShapeIRI: IRI,
     constraintsGraph: IRI,
@@ -133,7 +133,7 @@ fun buildSchemas(conn: SailRepositoryConnection, directory: File): MutableList<S
             ?: throw NoRootObjectException("No root object found in constraints file: $constraintsFileURL")
 
         val schema =
-            buildSchema(conn, rootObjectIRI, constraintsFileURL, listOf(rootObjectIRI), *vocabularyFileURLs)
+            build(conn, rootObjectIRI, constraintsFileURL, listOf(rootObjectIRI), *vocabularyFileURLs)
         schemas.add(schema)
     }
 
