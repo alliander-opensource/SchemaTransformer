@@ -84,7 +84,7 @@ private fun buildRecordSchema(
         fields = when {
             p.datatype != null -> SchemaBuilder.builder().type(xsdToAvro[p.datatype.localName])
             p.node != null ->
-                if (p.node !in ancestorsPath) build(
+                if (p.node !in ancestorsPath) buildSchema(
                     conn,
                     p.node,
                     constraintsGraph,
@@ -105,7 +105,7 @@ private fun buildRecordSchema(
     return fields.endRecord()
 }
 
-fun build(
+fun buildSchema(
     conn: SailRepositoryConnection,
     nodeShapeIRI: IRI,
     constraintsGraph: IRI,
@@ -133,7 +133,7 @@ fun buildSchemas(conn: SailRepositoryConnection, directory: File): MutableList<S
             ?: throw NoRootObjectException("No root object found in constraints file: $constraintsFileURL")
 
         val schema =
-            build(conn, rootObjectIRI, constraintsFileURL, listOf(rootObjectIRI), *vocabularyFileURLs)
+            buildSchema(conn, rootObjectIRI, constraintsFileURL, listOf(rootObjectIRI), *vocabularyFileURLs)
         schemas.add(schema)
     }
 

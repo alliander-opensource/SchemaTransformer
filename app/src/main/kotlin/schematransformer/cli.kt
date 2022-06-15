@@ -6,8 +6,7 @@ import org.eclipse.rdf4j.repository.sail.SailRepository
 import org.eclipse.rdf4j.sail.memory.MemoryStore
 import picocli.CommandLine.Option
 import picocli.CommandLine.Command
-import picocli.CommandLine.Parameters
-import schematransformer.avro.write
+import schematransformer.avro.writeSchema
 
 import java.io.File;
 import java.util.concurrent.Callable
@@ -50,7 +49,7 @@ class SchemaTransformer : Callable<Int> {
 
                     val schema = buildSchemas(conn, model.path)[0]
                     println(schema)
-                    write(schema, File(outPath))
+                    writeSchema(schema, File(outPath))
                     return 0
                 }
             } finally {
