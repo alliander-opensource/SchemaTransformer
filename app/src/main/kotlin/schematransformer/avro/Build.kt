@@ -48,7 +48,7 @@ private fun transformCardinality(schema: Schema, minCount: Int, maxCount: Int): 
     SchemaBuilder.builder().let { builder ->
         return when (normalizedMinCount to normalizedMaxCount) {
             1 to 1 -> baseSchema
-            0 to 1 -> builder.unionOf().nullType().and().type(schema).endUnion();
+            0 to 1 -> builder.unionOf().nullType().and().type(schema).endUnion()
             0 to Int.MAX_VALUE -> builder.unionOf().nullType().and().array().items().type(schema).endUnion()
             1 to Int.MAX_VALUE -> builder.array().items(schema)
             else -> throw UnsupportedCardinalityException()
