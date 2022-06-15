@@ -6,29 +6,31 @@ import org.eclipse.rdf4j.repository.sail.SailRepository
 import org.eclipse.rdf4j.sail.memory.MemoryStore
 import picocli.CommandLine.Option
 import picocli.CommandLine.Command
+import picocli.CommandLine.Parameters
+import schematransformer.avro.write
 
 import java.io.File;
 import java.util.concurrent.Callable
 
 @Command(name = "schema-transformer")
-class SchemaTransformer: Callable<Int> {
+class SchemaTransformer : Callable<Int> {
     @Option(
         names = ["-c", "--config"],
         paramLabel = "CONFIG FILE",
         description = ["run config file for multiple profiles"]
     )
-    lateinit var runConfig: File
+    var runConfig: File? = null
 
     @Option(names = ["-b", "--base-path"], description = ["absolute base path, supply if you are using -c"])
-    lateinit var basePath: String
+    var basePath: String? = null
 
     @Option(names = ["-p", "--dx-prof"], description = ["path to profile directory, use with single profile"])
-    lateinit var inputFilePath: String
+    var inputFilePath: String? = null
 
-    @Option(names = ["-o", "--output"], description = ["path for file output"])
+    @Option(names = ["-o", "--output"], required = true, description = ["path for file output"])
     lateinit var outPath: String
 
-    var paths: Set<String> = setOf()
+    var paths: MutableSet<String> = mutableSetOf()
 
     override fun call(): Int {
         run()
@@ -36,22 +38,26 @@ class SchemaTransformer: Callable<Int> {
     }
 
     private fun run(): Int {
-        val directory = File("app/src/test/resources/rdfs")
-        val model = readDirectory(directory)
+        if (runConfig != null && basePath != null) {
+            TODO()
+        } else if (inputFilePath != null) {
+            val model = readDirectory(File(inputFilePath!!))
 
-        val db = SailRepository(MemoryStore())
-        try {
-            db.connection.use { conn ->
-                conn.add(model.data)
+            val db = SailRepository(MemoryStore())
+            try {
+                db.connection.use { conn ->
+                    conn.add(model.data)
 
-
-                val schemas = buildSchemas(conn, model.path)
-                println(schemas[0])
-                // WRITE
-                return 0
+                    val schema = buildSchemas(conn, model.path)[0]
+                    println(schema)
+                    write(schema, File(outPath))
+                    return 0
+                }
+            } finally {
+                db.shutDown()
             }
-        } finally {
-            db.shutDown()
+
         }
+        return 1
     }
 }
