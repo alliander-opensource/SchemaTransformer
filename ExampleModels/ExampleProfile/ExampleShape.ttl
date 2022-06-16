@@ -35,6 +35,7 @@ shape:BShape
     sh:targetClass vocab:B ;
     sh:and (shape:AShape) ;
     sh:property [
+        rdfs:comment "primary key"; 
         sh:path vocab:id ;
         sh:datatype xsd:string ; 
         sh:minCount 1;
@@ -78,6 +79,7 @@ shape:DShape
         sh:maxCount 1;
     ] ;
     sh:property [
+        rdfs:comment "primary key"
         sh:path vocab:def ;
         sh:datatype xsd:int ;
         sh:minCount 0 ;
