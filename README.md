@@ -1,5 +1,10 @@
 # Schema Transformer
 
+# ⛔️ DEPRECATED
+This repository is deprecated and will soon be deleted entirely.
+
+The project is continued [here](https://github.com/alliander-opensource/schema-transformer).
+
 ## Contributing
 
 Please read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [CONTRIBUTING.md](CONTRIBUTING.md) for details on the process for submitting pull requests to us.
